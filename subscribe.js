@@ -40,13 +40,13 @@
   bar.setAttribute("aria-label", "Early access signup");
   bar.innerHTML = `
     <button class="sb-x" aria-label="Dismiss">×</button>
-    <div class="sb-txt"><b>Spend on it. Own a piece of it.</b>
-      <span id="sb-sub">Coming soon: <strong>agentic cards</strong>. Each card is tied to one tool (ChatGPT, Netflix, Uber…) and manages that spend for you. A personal CFO for everyone.</span>
+    <div class="sb-txt"><b>Cards that think before you spend.</b>
+      <span id="sb-sub"><strong>Agentic cards</strong>: one for every subscription. Each caps, pauses and cancels on its own, then invests what it saves in the companies you pay. Your personal CFO, on autopilot.</span>
       <div class="sb-msg" id="sb-msg"></div></div>
     <form novalidate>
       <input type="email" name="email" placeholder="you@email.com" autocomplete="email" required aria-label="Email address">
       <input class="sb-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <button type="submit">Join the waitlist</button>
+      <button type="submit">Claim my card</button>
     </form>`;
   document.body.appendChild(bar);
   document.body.classList.add("sb-pad");
@@ -71,10 +71,10 @@
       store.set("sa-sub", "done");
       bar.classList.add("done");
       bar.querySelector(".sb-txt b").textContent = d.already ? "You're already on the list ✓" : "You're on the list ✓";
-      bar.querySelector("#sb-sub").textContent = "We'll email you when agentic cards launch. No spam.";
+      bar.querySelector("#sb-sub").textContent = "Your card is reserved. We'll email you the moment agentic cards go live.";
     } catch (err) {
       msg(err.message || "Something went wrong. Please try again.");
-      btn.disabled = false; btn.textContent = "Join the waitlist";
+      btn.disabled = false; btn.textContent = "Claim my card";
     }
   };
 })();
