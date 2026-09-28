@@ -140,8 +140,9 @@ const GF_EX = {NASDAQ:"NASDAQ",NYSE:"NYSE",TWSE:"TPE",TPEx:"TPEX","Euronext AMS"
 // International companies that also trade on a US exchange (ADR or direct listing)
 const US_LINE = {"2330.TW":"TSM","6758.T":"SONY","7203.T":"TM","SHEL.L":"SHEL","9988.HK":"BABA","9618.HK":"JD","BP.L":"BP","ULVR.L":"UL","ENI.MI":"E",
   "VOD.L":"VOD","NOKIA.HE":"NOK","ERIC-B.ST":"ERIC","RYA.IR":"RYAAY","ASML":"ASML","SPOT":"SPOT"};
-const isUS = tk => ["NASDAQ","NYSE"].includes(CO[tk].x);
-const gfUrl = tk => `https://www.google.com/finance/quote/${encodeURIComponent(tk.replace(/\.[A-Z]+$/,""))}:${GF_EX[CO[tk].x]||""}`;
+const isUS = tk => ["NASDAQ","NYSE","US-listed ETF"].includes(CO[tk].x);
+const ySym = tk => tk==="ENBD.DFM" ? "EMIRATESNBD.AE" : tk.endsWith(".DFM") ? tk.slice(0,-4)+".AE" : tk;
+const gfUrl = tk => `https://finance.yahoo.com/quote/${encodeURIComponent(ySym(tk))}`;
 function brokerLinks(tk){
   const us = isUS(tk) ? tk : US_LINE[tk];
   const out=[];
@@ -169,7 +170,7 @@ function openBuy(tk){
     <p class="bs-w">${esc(c.w)}</p>
     ${us && !isUS(tk)?`<p class="bs-note">Also trades in the US as <b>${us}</b>, so you can buy it from most US brokers.</p>`:""}
     <div class="bs-list">${out.map(([n,u,s])=>`<a class="bs-b" href="${u}" target="_blank" rel="noopener sponsored"><span><b>Buy on ${esc(n)}</b><small>${esc(s)}</small></span><span>↗</span></a>`).join("")}
-      <a class="bs-b bs-q" href="${gfUrl(tk)}" target="_blank" rel="noopener"><span><b>Live price & chart</b><small>Google Finance</small></span><span>↗</span></a></div>
+      <a class="bs-b bs-q" href="${gfUrl(tk)}" target="_blank" rel="noopener"><span><b>Live price & chart</b><small>Yahoo Finance</small></span><span>↗</span></a></div>
     <p class="bs-d">Links go to third-party brokers. We're not affiliated, and this isn't investment advice. Check fees and availability in your country.</p></div>`;
   el.classList.add("on");
   const close=()=>el.classList.remove("on");

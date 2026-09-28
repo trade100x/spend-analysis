@@ -32,3 +32,9 @@ npx wrangler kv key list --binding SUBSCRIBERS --remote              # all signu
 npx wrangler kv key get "sub:name@example.com" --binding SUBSCRIBERS --remote   # one signup's details
 ```
 Deploy to Cloudflare with `npx wrangler deploy`.
+
+## Live data sources
+- **Prices:** monthly closes from Yahoo Finance, built by `tools/fetch_prices.py` into `prices.json` and refreshed daily by the Worker's cron (`/api/prices`, cached in KV). They power the "If you'd invested it instead" returns.
+- **Trending:** Apple's public App Store top-grossing RSS, fetched by the browser for the visitor's country.
+- **Ownership:** Wikidata (`/api/lookup?q=`), which follows owned-by/parent relations up to a listed company. It's used when someone adds a brand we haven't curated.
+- **Local companies:** everyday categories (electricity, groceries) switch to the visitor's country, e.g. DEWA/Empower in the UAE, NTPC/Tata Power in India, National Grid in the UK.

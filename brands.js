@@ -52,6 +52,41 @@ Object.assign(CAT, {
   telecom:{l:"Telecom networks",c:"#2563eb"}, apparel:{l:"Apparel manufacturing",c:"#db2777"}, autoparts:{l:"Auto parts & batteries",c:"#dc2626"},
 });
 
+
+/* ---------- More listed peers + ETFs (ways to invest when a company is private) ---------- */
+Object.assign(CO, {
+  ASTS:{n:"AST SpaceMobile",x:"NASDAQ",r:"AM",w:"Satellite-to-phone broadband"}, IRDM:{n:"Iridium",x:"NASDAQ",r:"AM",w:"Satellite communications"},
+  SATS:{n:"EchoStar",x:"NASDAQ",r:"AM",w:"Satellite TV and wireless spectrum"}, RBLX:{n:"Roblox",x:"NYSE",r:"AM",w:"User-generated gaming platform"},
+  EA:{n:"Electronic Arts",x:"NASDAQ",r:"AM",w:"EA Sports FC, Apex Legends"}, TTWO:{n:"Take-Two Interactive",x:"NASDAQ",r:"AM",w:"GTA, NBA 2K"},
+  SOFI:{n:"SoFi",x:"NASDAQ",r:"AM",w:"Digital bank"}, NU:{n:"Nu Holdings",x:"NYSE",r:"AM",w:"Latin America's largest digital bank"},
+  HOOD:{n:"Robinhood",x:"NASDAQ",r:"AM",w:"Retail brokerage and crypto app"}, ANGH:{n:"Anghami",x:"NASDAQ",r:"ME",w:"Middle East music streaming"},
+  "RMS.PA":{n:"Hermès",x:"Euronext PAR",r:"EU",w:"Birkin bags and silk"}, "CFR.SW":{n:"Richemont",x:"SIX",r:"EU",w:"Cartier, Van Cleef & Arpels, IWC"},
+  "UHR.SW":{n:"Swatch Group",x:"SIX",r:"EU",w:"Omega, Longines, Swatch"},
+  "1024.HK":{n:"Kuaishou",x:"HKEX",r:"AP",w:"Short-video platform; makes the Kling AI video model"},
+  MTCH:{n:"Match Group",x:"NASDAQ",r:"AM",w:"Tinder, Hinge, OkCupid"}, BMBL:{n:"Bumble",x:"NASDAQ",r:"AM",w:"Bumble dating app"},
+  PTON:{n:"Peloton",x:"NASDAQ",r:"AM",w:"Connected fitness"},
+});
+const ETF = {
+  SMH:["VanEck Semiconductor ETF","Semiconductor makers: NVIDIA, TSMC, ASML…","vaneck.com"], AIQ:["Global X AI & Technology ETF","Global AI and big-data companies","globalxetfs.com"],
+  IBUY:["Amplify Online Retail ETF","Online retailers worldwide","amplifyetfs.com"], EBIZ:["Global X E-commerce ETF","Global e-commerce companies","globalxetfs.com"],
+  XLY:["Consumer Discretionary SPDR","US consumer discretionary: Amazon, Tesla, McDonald's…","ssga.com"], XLC:["Communication Services SPDR","Google, Meta, Netflix, Disney…","ssga.com"],
+  XLP:["Consumer Staples SPDR","Walmart, Costco, P&G, PepsiCo…","ssga.com"], XLE:["Energy SPDR","Exxon, Chevron and US energy","ssga.com"],
+  XLU:["Utilities SPDR","US electric utilities","ssga.com"], XLK:["Technology SPDR","Apple, Microsoft, NVIDIA…","ssga.com"],
+  IGV:["iShares Expanded Tech-Software ETF","Software companies","ishares.com"], WCLD:["WisdomTree Cloud Computing ETF","Cloud software companies","wisdomtree.com"],
+  IXP:["iShares Global Comm Services ETF","Global telecom and media","ishares.com"], DRIV:["Global X Autonomous & EV ETF","EVs, batteries and self-driving","globalxetfs.com"],
+  KARS:["KraneShares Electric Vehicles ETF","EV makers and battery suppliers","kraneshares.com"], JETS:["U.S. Global Jets ETF","Airlines and airports","usglobaletfs.com"],
+  PEJ:["Invesco Leisure & Entertainment ETF","Hotels, cruise lines, restaurants, entertainment","invesco.com"], UFO:["Procure Space ETF","Satellite and space companies","procureetfs.com"],
+  ESPO:["VanEck Video Gaming & eSports ETF","Game publishers and platforms","vaneck.com"], HERO:["Global X Video Games & Esports ETF","Video game companies","globalxetfs.com"],
+  FINX:["Global X FinTech ETF","Fintech and digital payments","globalxetfs.com"], ARKF:["ARK Fintech Innovation ETF","Fintech innovators","ark-funds.com"],
+  EWJ:["iShares MSCI Japan ETF","Large Japanese companies","ishares.com"],
+  EWI:["iShares MSCI Italy ETF","Large Italian companies","ishares.com"], UAE:["iShares MSCI UAE ETF","Large UAE companies","ishares.com"],
+  GRID:["First Trust Smart Grid ETF","Grid and electrification companies","ftportfolios.com"], URTH:["iShares MSCI World ETF","Developed-market stocks worldwide","ishares.com"],
+  SPY:["SPDR S&P 500 ETF","The 500 largest US companies","ssga.com"],
+};
+Object.entries(ETF).forEach(([t,[n,w,d]])=>{ CO[t]={n,x:"US-listed ETF",r:"AM",w,etf:true}; DOM[t]=d; });
+Object.assign(DOM, {ASTS:"ast-science.com",IRDM:"iridium.com",SATS:"echostar.com",RBLX:"roblox.com",EA:"ea.com",TTWO:"take2games.com",SOFI:"sofi.com",
+  NU:"nu.com.mx",HOOD:"robinhood.com","1024.HK":"kuaishou.com",MTCH:"mtch.com",BMBL:"bumble.com",PTON:"onepeloton.com",ANGH:"anghami.com","RMS.PA":"hermes.com","CFR.SW":"richemont.com","UHR.SW":"swatchgroup.com"});
+
 /* ---------- Category templates ---------- */
 const clone = o => JSON.parse(JSON.stringify(o));
 // Re-point a template at a specific brand: its listed owners take the root, and any "slot" tickers are swapped for them
@@ -133,6 +168,52 @@ const ARCH = {
       {name:"Booking platforms",pct:12,cat:"travel",cos:["BKNG","EXPE"],desc:"OTA commissions"},
       {name:"Energy & supplies",pct:6,cat:"power",cos:["CARR","NEE"],desc:"HVAC, power, linens"},
       {name:"Payments",pct:2,cat:"payments",cos:["V","MA"],desc:"Card fees"}]})},
+  aiapp:{l:"AI app",cat:"ai",prods:[["Monthly plan",20]],
+    insight:"Most AI apps don't train their own models. They pay model makers and GPU clouds per use, and spend heavily on ads to win users, so margins are thin.",
+    tree:()=>({children:[
+      {name:"AI model & API providers",pct:35,cat:"ai",cos:["GOOGL","1024.HK","MSFT"],desc:"Pays for models like Google Veo/Gemini, Kling (Kuaishou), OpenAI (Microsoft-backed) and others",children:[
+        {name:"GPU compute behind the models",pct:50,cat:"chips",cos:["NVDA","AMD"],desc:"Model makers rent or buy GPUs",children:[
+          {name:"Chip foundry",pct:30,cat:"fab",cos:["2330.TW"],desc:"TSMC"}]}]},
+      {name:"GPU cloud for its own features",pct:18,cat:"cloud",cos:["AMZN","GOOGL","CRWV"],desc:"Inference, storage, video rendering",children:[
+        {name:"Chips",pct:45,cat:"chips",cos:["NVDA"],desc:"GPUs"}]},
+      {name:"App store fees",pct:8,cat:"payments",cos:["AAPL","GOOGL"],desc:"iOS and Android in-app billing"},
+      {name:"Marketing",pct:18,cat:"ads",cos:["META","GOOGL"],desc:"Paid social and search ads to acquire users"},
+      {name:"Staff",pct:12,cat:"labor",cos:[],desc:"Small teams of engineers and researchers"},
+      {name:"Payments",pct:3,cat:"payments",cos:["V","MA"],desc:"Card fees"}]})},
+  satellite:{l:"Satellite internet",cat:"telecom",prods:[["Monthly plan",120]],
+    insight:"Satellite internet is capital-heavy: satellites, launches and user dishes eat most of the money before any profit.",
+    tree:()=>({children:[
+      {name:"Satellites & launches",pct:35,cat:"telecom",cos:[],desc:"Built and launched in-house (not listed separately)"},
+      {name:"User terminals (dishes)",pct:15,cat:"components",cos:["STM"],desc:"Dish hardware; STMicroelectronics is a reported chip supplier"},
+      {name:"Ground stations & network ops",pct:10,cat:"telecom",cos:[],desc:"Gateways and backhaul"},
+      {name:"Spectrum & regulatory",pct:5,cat:"tax",cos:[],desc:"Licences in each country"},
+      {name:"Staff & R&D",pct:15,cat:"labor",cos:[],desc:"Engineers"},
+      {name:"Payments",pct:2,cat:"payments",cos:["V","MA"],desc:"Card fees"}]})},
+  games:{l:"Video games",cat:"media",prods:[["Monthly spend",20]],
+    insight:"When you buy a game or in-game currency, app and console stores often take about 30% before the developer sees anything.",
+    tree:()=>({children:[
+      {name:"Game development (staff)",pct:30,cat:"labor",cos:[],desc:"Developers, artists, designers"},
+      {name:"Platform & store fees",pct:20,cat:"software",cos:["AAPL","GOOGL","6758.T","MSFT","7974.T"],desc:"App Store, Google Play, PlayStation, Xbox, Nintendo"},
+      {name:"Servers & cloud",pct:8,cat:"cloud",cos:["AMZN","MSFT"],desc:"Online multiplayer hosting"},
+      {name:"Marketing",pct:10,cat:"ads",cos:["META","GOOGL"],desc:"User acquisition"},
+      {name:"Payments",pct:3,cat:"payments",cos:["V","MA","PYPL"],desc:"Card and wallet fees"}]})},
+  fintech:{l:"Fintech / banking app",cat:"software",prods:[["Premium plan",9.99]],
+    insight:"Banking-app subscriptions mostly fund staff, compliance, cloud and marketing. Card networks earn on every tap.",
+    tree:()=>({children:[
+      {name:"Card networks",pct:12,cat:"payments",cos:["V","MA"],desc:"Network fees on card spending"},
+      {name:"Banking partners & custody",pct:10,cat:"payments",cos:[],desc:"Licensed partner banks"},
+      {name:"Cloud",pct:8,cat:"cloud",cos:["AMZN","GOOGL"],desc:"Hosting"},
+      {name:"Staff",pct:25,cat:"labor",cos:[],desc:"Engineers and support"},
+      {name:"Marketing",pct:12,cat:"ads",cos:["META","GOOGL"],desc:"Acquisition"},
+      {name:"Compliance & regulation",pct:8,cat:"tax",cos:[],desc:"KYC, audits, licences"}]})},
+  luxury:{l:"Luxury goods",cat:"luxury",prods:[["A purchase",1000,true]],
+    insight:"Luxury brands keep a large share of the price: materials and craftsmanship are a small part, while brand, boutiques and marketing make up the rest.",
+    tree:()=>({children:[
+      {name:"Materials",pct:8,cat:"materials",cos:[],desc:"Leather, gold, steel, fabrics (mostly private suppliers)"},
+      {name:"Craftsmanship & workshops",pct:12,cat:"labor",cos:[],desc:"Artisans, mostly in-house"},
+      {name:"Boutiques & staff",pct:15,cat:"labor",cos:[],desc:"Store teams",children:[{name:"Prime retail rent",pct:40,cat:"realestate",cos:[],desc:"Flagship locations"}]},
+      {name:"Marketing & events",pct:12,cat:"ads",cos:["META","GOOGL"],desc:"Campaigns, shows, ambassadors"},
+      {name:"Payments",pct:2,cat:"payments",cos:["V","MA"],desc:"Card fees"}]})},
   car:{l:"Car purchase",cat:"auto",prods:[["A new car",40000,true]],
     insight:"A car is mostly parts: batteries or engines, chips, steel, aluminum and tyres from a global supplier base. The automaker keeps a single-digit margin.",
     tree:()=>({children:[
@@ -207,9 +288,9 @@ const BRANDS = [
   ["applemusic","Apple Music","apple.com","music",["AAPL"],"Apple"],
   ["tidal","Tidal","tidal.com","music",["XYZ"],"Owned by Block"],
   ["deezer","Deezer","deezer.com","music",["DEEZR.PA"],"French streaming service"],
-  ["anghami","Anghami","anghami.com","music",[],"Middle East music streaming"],
+  ["anghami","Anghami","anghami.com","music",["ANGH"],"Middle East music streaming, listed on Nasdaq"],
   // AI & software
-  ["claude","Claude","claude.ai","ai",["AMZN","GOOGL"],"Anthropic is private; Amazon and Google are major investors"],
+  ["claude","Claude","claude.ai","ai",[],"Anthropic is private; Amazon and Google are major investors"],
   ["gemini","Google Gemini / Google One","gemini.google.com","ai",["GOOGL"],"Alphabet; runs on Google's own TPUs"],
   ["copilot","Microsoft 365 Copilot","microsoft.com","ai",["MSFT"],"Microsoft"],
   ["perplexity","Perplexity","perplexity.ai","ai",[],"Private"],
@@ -288,13 +369,59 @@ const BRANDS = [
   ["chevron","Chevron","chevron.com","fuel",["CVX"],"Chevron"],
   ["indianoil","Indian Oil","iocl.com","fuel",["IOC.NS"],"State-controlled Indian refiner and retailer"],
   ["adnoc","ADNOC","adnoc.ae","fuel",["ADNOCDIST.AD"],"ADNOC Distribution (UAE)"],
+  // Trending AI apps
+  ["higgsfield","Higgsfield AI","higgsfield.ai","aiapp",[],"Private AI video app; runs on third-party video models",[["Monthly plan",29]]],
+  ["runway","Runway","runwayml.com","ai",[],"Private; trains its own video models",[["Monthly plan",15]]],
+  ["pika","Pika","pika.art","aiapp",[],"Private AI video app"],
+  ["luma","Luma Dream Machine","lumalabs.ai","ai",[],"Private; trains its own video models",[["Monthly plan",30]]],
+  ["suno","Suno","suno.com","ai",[],"Private AI music generator",[["Monthly plan",10]]],
+  ["elevenlabs","ElevenLabs","elevenlabs.io","ai",[],"Private AI voice company",[["Monthly plan",22]]],
+  ["characterai","Character.AI","character.ai","aiapp",[],"Private AI companion app",[["c.ai+",9.99]]],
+  ["replit","Replit","replit.com","aiapp",[],"Private AI coding platform",[["Monthly plan",25]]],
+  ["lovable","Lovable","lovable.dev","aiapp",[],"Private AI app builder (Sweden)",[["Monthly plan",25]]],
+  ["boltnew","Bolt.new","bolt.new","aiapp",[],"Private (StackBlitz)",[["Monthly plan",25]]],
+  ["v0","v0 by Vercel","v0.app","aiapp",[],"Vercel is private",[["Monthly plan",20]]],
+  ["grok","Grok (xAI)","x.ai","ai",[],"xAI is private",[["SuperGrok",30]]],
+  ["mistral","Le Chat (Mistral)","mistral.ai","ai",[],"Mistral AI is private (France); ASML is its largest investor",[["Pro",14.99]]],
+  ["kling","Kling AI","klingai.com","aiapp",["1024.HK"],"Made by Kuaishou, listed in Hong Kong",[["Monthly plan",10]]],
+  ["gamma","Gamma","gamma.app","aiapp",[],"Private AI presentation app",[["Monthly plan",10]]],
+  ["krea","Krea","krea.ai","aiapp",[],"Private AI image and video app",[["Monthly plan",10]]],
+  ["ideogram","Ideogram","ideogram.ai","ai",[],"Private AI image generator",[["Monthly plan",8]]],
+  ["firefly","Adobe Firefly","firefly.adobe.com","ai",["ADBE"],"Adobe's generative AI",[["Monthly plan",9.99]]],
+  ["poe","Poe","poe.com","aiapp",[],"Owned by Quora (private)",[["Monthly plan",19.99]]],
+  ["opusclip","OpusClip","opus.pro","aiapp",[],"Private AI video clipping app",[["Monthly plan",15]]],
+  ["capcut","CapCut Pro","capcut.com","aiapp",[],"Owned by ByteDance (private)",[["Monthly plan",9.99]]],
+  ["granola","Granola","granola.ai","aiapp",[],"Private AI meeting notes app",[["Monthly plan",14]]],
+  // Popular subscriptions
+  ["roblox","Roblox","roblox.com","games",["RBLX"],"Listed on NYSE",[["Robux",20]]],
+  ["tinder","Tinder","tinder.com","software",["MTCH"],"Owned by Match Group",[["Monthly plan",25]]],
+  ["hinge","Hinge","hinge.co","software",["MTCH"],"Owned by Match Group",[["Monthly plan",30]]],
+  ["bumble","Bumble","bumble.com","software",["BMBL"],"Bumble Inc",[["Monthly plan",25]]],
+  ["peloton","Peloton","onepeloton.com","software",["PTON"],"Peloton Interactive",[["App membership",24]]],
+  ["oura","Oura Ring","ouraring.com","electronics",[],"Private (Finland)",[["Ring",349,true],["Membership",5.99]]],
+  ["whoop","Whoop","whoop.com","electronics",[],"Private",[["Membership",30]]],
+  ["strava","Strava","strava.com","software",[],"Private",[["Subscription",11.99]]],
+  ["substack","Substack","substack.com","software",[],"Private; writers keep about 90% of subscriptions",[["Subscriptions",10]]],
+  ["robinhoodgold","Robinhood Gold","robinhood.com","fintech",["HOOD"],"Robinhood Markets",[["Gold",5]]],
+  ["calm","Calm","calm.com","software",[],"Private",[["Subscription",14.99]]],
+  // Well-known private companies (estimated)
+  ["starlink","Starlink","starlink.com","satellite",[],"Part of SpaceX, which is private"],
+  ["tiktokshop","TikTok Shop","tiktok.com","ecommerce",[],"Owned by ByteDance (private)"],
+  ["revolut","Revolut","revolut.com","fintech",[],"Private (UK)",[["Premium",9.99],["Metal",16.99]]],
+  ["fortnite","Fortnite (Epic Games)","epicgames.com","games",[],"Epic Games is private; Tencent and Sony are shareholders",[["V-Bucks",20]]],
+  ["steam","Steam (Valve)","steampowered.com","games",[],"Valve is private",[["Games",30]]],
+  ["discord","Discord Nitro","discord.com","software",[],"Private",[["Nitro",9.99]]],
+  ["patreon","Patreon","patreon.com","software",[],"Private; creators keep most of each membership",[["Memberships",15]]],
+  ["chanel","Chanel","chanel.com","luxury",[],"Private (owned by the Wertheimer family)",[["A purchase",1500,true]]],
+  ["rolex","Rolex","rolex.com","luxury",[],"Private (owned by the Hans Wilsdorf Foundation)",[["A watch",10000,true]]],
 ];
 const PALETTE=["#111827","#1d4ed8","#b91c1c","#047857","#7c3aed","#c2410c","#0e7490","#be185d"];
 BRANDS.forEach(([k,name,d,a,owners,note,prods],i)=>{
   const A=ARCH[a], base=A.src?M[A.src]:null;
   const ownerLabel = owners.length ? owners.map(o=>CO[o].n).join(" + ") : "Private";
   M[k]={name, cat:A.cat, color:PALETTE[i%PALETTE.length], txcat:A.l, arch:a,
-    stats:[[ownerLabel,"Listed owner"],[A.l,"Category"],[owners.length?owners.map(o=>CO[o].x).join(", "):"Not listed","Exchange"]],
+    stats:owners.length?[[ownerLabel,"Listed owner"],[A.l,"Category"],[owners.map(o=>CO[o].x).join(", "),"Exchange"]]
+      :[["Private","Not listed on any exchange"],[A.l,"Category"],["Estimated","Cost structure based on business type"]],
     insight:`${note}. ${A.insight || base?.insight || ""}`.replace(/\.\./g,"."),
     tokens: base?.tokens || [], tokenNote: base?.tokenNote || "No credible token exposure for this brand.",
     src: owners.map(o=>[`${CO[o].n} (${o})`,`https://www.google.com/finance/quote/${o}`]).slice(0,2),
@@ -306,18 +433,61 @@ BRANDS.forEach(([k,name,d,a,owners,note,prods],i)=>{
 Object.values(M).forEach(m=>{ if(!m.products) m.products=[{id:"default",n:m.name,price:20}]; });
 
 /* ---------- Custom brands: anything not in the list, estimated from a category template ---------- */
-const CUSTOM_ARCH = ["ecommerce","delivery","ridehail","streaming","music","ai","software","fashion","restaurant","cafe","grocery","telecom","electronics","car","airline","hotel","fuel"];
-function addCustom(name, a){
+const CUSTOM_ARCH = ["aiapp","ecommerce","delivery","ridehail","streaming","music","ai","software","fashion","restaurant","cafe","grocery","telecom","electronics","car","airline","hotel","fuel"];
+// opts.owners: [{ticker,name,exchange,region,site}] from the Wikidata lookup; opts.site: the brand's own website (for its logo)
+function addCustom(name, a, opts={}){
+  const owners=(opts.owners||[]).filter(o=>o&&o.ticker);
+  owners.forEach(o=>{ if(!CO[o.ticker]) CO[o.ticker]={n:o.name,x:o.exchange,r:o.region||"AM",w:"Listed owner of "+name+" (via Wikidata)"}; if(o.site&&!DOM[o.ticker]) DOM[o.ticker]=o.site; });
+  const tick=owners.map(o=>o.ticker);
   const slug = name.toLowerCase().replace(/[^a-z0-9]/g,"");
   const k = "x_"+slug+"_"+a;
-  if(!M[k]){
-    const A=ARCH[a], base=A.src?M[A.src]:null;
-    M[k]={name, cat:A.cat, color:"#52525b", txcat:A.l, arch:a, custom:true,
-      stats:[["Estimate","Based on a typical "+A.l.toLowerCase()+" business"],[A.l,"Category"],["Unknown","Owner not in our database"]],
-      insight:`We don't have ${name} in our database yet, so this uses a typical ${A.l.toLowerCase()} supply chain. The companies shown are the usual suppliers in this category, not confirmed ${name} partners. ${A.insight || base?.insight || ""}`,
-      tokens: base?.tokens || [], tokenNote:"No token data for custom brands.", src:[],
-      products:A.prods.map(([n,price,once],j)=>({id:"p"+j,n,price,once:!!once})), root:archTree(a,[])};
-    MDOM[k]=slug+".com";
-  }
+  const A=ARCH[a], base=A.src?M[A.src]:null;
+  const ownerLabel = tick.length ? tick.map(t=>CO[t].n).join(" + ") : "Private / not found";
+  M[k]={name, cat:A.cat, color:"#52525b", txcat:A.l, arch:a, custom:true, private:!tick.length, ownersInfo:owners,
+    stats:[[ownerLabel, tick.length?"Listed owner (Wikidata)":"No listed owner found"],[A.l,"Category"],[tick.length?tick.map(t=>CO[t].x).join(", "):"Estimate","Exchange"]],
+    insight:`We don't have ${name} in our curated database, so this uses a typical ${A.l.toLowerCase()} cost structure${tick.length?`. Ownership comes from Wikidata: ${ownerLabel}`:""}. The suppliers shown are the usual ones in this category, not confirmed ${name} partners. ${A.insight || base?.insight || ""}`,
+    tokens: base?.tokens || [], tokenNote:"No token data for this brand.", src: opts.qid?[["Wikidata: "+name,"https://www.wikidata.org/wiki/"+opts.qid]]:[],
+    products:A.prods.map(([n,price,once],j)=>({id:"p"+j,n,price,once:!!once})), root:archTree(a,tick)};
+  MDOM[k]=opts.site || slug+".com";
   return k;
 }
+
+/* ---------- Private companies & ways to invest ---------- */
+// Listed shareholders of private companies (you can't buy the company, but you can buy them)
+const INVESTORS = {openai:["MSFT","9984.T","NVDA"], claude:["AMZN","GOOGL"], fortnite:["0700.HK","6758.T"], perplexity:["NVDA"], mistral:["ASML","NVDA"]};
+const PRIVATE = new Set(["openai","claude","perplexity","cursor","midjourney","canva","notion","shein","noon","ikea","bolt","ola","didi","zepto","subway","lidl","emirates",
+  "starlink","tiktokshop","revolut","fortnite","steam","discord","patreon","chanel","rolex","higgsfield","runway","pika","luma","suno","elevenlabs",
+  "characterai","replit","lovable","boltnew","v0","grok","mistral","gamma","krea","ideogram","poe","opusclip","capcut","granola","oura","whoop","strava","substack","calm"]);
+PRIVATE.forEach(k=>{ if(M[k]) M[k].private=true; });
+Object.entries(INVESTORS).forEach(([k,l])=>{ if(M[k]&&M[k].arch) M[k].stats[0]=[l.map(t=>CO[t].n).join(", "),"Listed investors (the company itself is private)"]; });
+const MERCH_ARCH = {openai:"ai",netflix:"streaming",spotify:"music",amazon:"ecommerce",uber:"ridehail",starbucks:"cafe",figma:"software",apple:"electronics",airbnb:"hotel",shell:"fuel"};
+const INVEST = {
+  aiapp:{peers:["ADBE","1024.HK","GOOGL","META"],etfs:["AIQ","SMH"]},
+  ecommerce:{peers:["AMZN","9988.HK","PDD","MELI","SE","CPNG"],etfs:["IBUY","EBIZ"]}, ridehail:{peers:["UBER","LYFT","GRAB"],etfs:["XLY"]},
+  delivery:{peers:["DASH","3690.HK","ETERNAL.NS","DHER.DE"],etfs:["XLY"]}, streaming:{peers:["NFLX","DIS","WBD"],etfs:["XLC"]},
+  music:{peers:["SPOT","TME","UMG.AS"],etfs:["XLC"]}, ai:{peers:["MSFT","GOOGL","AMZN","META"],etfs:["SMH","AIQ"]},
+  software:{peers:["ADBE","FIG","MSFT"],etfs:["IGV","WCLD"]}, fashion:{peers:["ITX.MC","HM-B.ST","9983.T","PDD"],etfs:["XLY"]},
+  restaurant:{peers:["MCD","YUM","QSR","CMG"],etfs:["PEJ"]}, cafe:{peers:["SBUX","QSR"],etfs:["PEJ"]},
+  grocery:{peers:["WMT","COST","TSCO.L","AD.AS"],etfs:["XLP"]}, telecom:{peers:["TMUS","VZ","BHARTIARTL.NS","VOD.L"],etfs:["IXP"]},
+  electronics:{peers:["AAPL","005930.KS","1810.HK"],etfs:["SMH","XLK"]}, car:{peers:["TSLA","7203.T","1211.HK"],etfs:["DRIV","KARS"]},
+  airline:{peers:["DAL","UAL","RYA.IR","C6L.SI"],etfs:["JETS"]}, hotel:{peers:["MAR","HLT","BKNG"],etfs:["PEJ"]},
+  fuel:{peers:["XOM","SHEL.L","CVX"],etfs:["XLE"]}, travel:{peers:["BKNG","EXPE","TCOM"],etfs:["JETS","PEJ"]},
+  satellite:{peers:["ASTS","IRDM"],etfs:["UFO"]}, games:{peers:["0700.HK","RBLX","EA","TTWO","7974.T"],etfs:["ESPO","HERO"]},
+  fintech:{peers:["NU","SOFI","HOOD","XYZ"],etfs:["FINX","ARKF"]}, luxury:{peers:["MC.PA","RMS.PA","CFR.SW","UHR.SW"],etfs:[]},
+  groceries:{peers:["WMT","COST","NESN.SW","TSCO.L"],etfs:["XLP"]}, japan:{peers:["9022.T","7532.T","4661.T"],etfs:["EWJ"]},
+  italy:{peers:["MC.PA","CPR.MI","AC.PA"],etfs:["EWI"]}, dubai:{peers:["EMAAR.DFM","SALIK.DFM","DTC.DFM"],etfs:["UAE"]},
+  electricity:{peers:["NEE","CEG","GEV"],etfs:["XLU","GRID"]}, pets:{peers:["ZTS","IDXX","CHWY","NESN.SW"],etfs:[]},
+};
+// Everything a person could buy to get exposure to a brand, grouped by route
+function waysToInvest(k){
+  const m=M[k], a=m.arch||MERCH_ARCH[k]||k, inv=INVEST[a]||{peers:[],etfs:[]};
+  const own=(view(k).root.cos||[]).filter(t=>CO[t]&&!CO[t].etf);
+  const direct = m.private ? [] : own;
+  const investors = INVESTORS[k] || (m.private ? [] : []);
+  const cos={}; flow(k,100).forEach(f=>{ const c=f.node.cos||[]; c.forEach(t=>cos[t]=(cos[t]||0)+f.listed/c.length); });
+  const skip=new Set([...direct,...investors]);
+  const suppliers=Object.entries(cos).filter(([t])=>!skip.has(t)).sort((x,y)=>y[1]-x[1]).slice(0,5).map(([t])=>t);
+  const peers=inv.peers.filter(t=>CO[t]&&!skip.has(t)&&!suppliers.includes(t));
+  return {direct, investors, suppliers, peers, etfs:inv.etfs.filter(t=>CO[t])};
+}
+const PRIVATE_NOTE = "This company is private, so its financials aren't public. The breakdown is an expected cost structure based on the technology it uses and the type of business it runs, not company-reported data.";

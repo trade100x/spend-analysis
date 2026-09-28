@@ -115,6 +115,30 @@ h2 small{font-weight:400;color:var(--faint);font-size:12px}
 .nb .node{border-top:0}
 .nb .nh{padding:6px 0}
 
+.trend{display:flex;grid-template-columns:none;overflow-x:auto;gap:8px;padding-bottom:4px;scroll-snap-type:x proximity}
+.trend .tile{flex:0 0 104px;scroll-snap-align:start}
+.trend .tile .ico{width:44px;height:44px;border-radius:11px;border:1px solid var(--line);object-fit:cover}
+.trend .tile small{font-size:10px;color:var(--faint);margin-top:-6px}
+.lk{font-size:13px;color:var(--muted);margin:0 0 10px}
+.lk b{color:var(--text);font-weight:500}
+.pnote{font-size:13px;color:var(--muted);background:var(--soft);border-radius:10px;padding:10px 12px;margin:0 0 12px}
+.ways{border:1px solid var(--line);border-radius:12px;padding:6px 12px 8px;margin-top:14px}
+.ways h5{font-size:12px;color:var(--muted);font-weight:500;margin:10px 0 6px}
+.wchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:99px;padding:2px 10px 2px 3px;font-size:12px;margin:0 6px 6px 0;cursor:pointer}
+.wchip:hover{border-color:var(--text)}
+.wchip i{font-style:normal;color:var(--faint)}
+.ways .pre{font-size:12px;color:var(--faint);margin:6px 0 4px}
+.periods{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:2px}
+.periods button{border:0;background:none;border-radius:99px;padding:3px 10px;font-size:12px;cursor:pointer;color:var(--muted)}
+.periods button.on{background:var(--text);color:#fff}
+.rbig{font-size:18px;line-height:1.35;letter-spacing:-.01em;font-weight:500;margin:6px 0 14px}
+.rcards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.rcard{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.rcard.me{border-color:var(--text)}
+.rcard small{display:block;font-size:11px;color:var(--muted)}
+.rcard b{display:block;font-size:17px;font-weight:600;margin-top:2px}
+.up{color:#15803d}.dn{color:#b91c1c}
+@media (max-width:560px){ .rcards{grid-template-columns:1fr} }
 .src{font-size:12px;color:var(--faint)}
 .src a{color:var(--faint)}
 .tok{display:inline-flex;gap:6px;align-items:baseline;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;margin:0 6px 6px 0}
@@ -181,9 +205,10 @@ details.all .irow{display:flex;justify-content:space-between;padding:4px 0;borde
   <div class="lines" id="lines"></div>
 
   <div class="foot">
+    <span><select class="pill-select" id="country" aria-label="Where you live"></select>
     <select class="pill-select" id="market" aria-label="Where you invest">
       <option value="ALL">Stocks from all markets</option><option value="AM">Americas only</option><option value="EU">Europe only</option><option value="AP">Asia-Pacific only</option><option value="ME">Middle East only</option>
-    </select>
+    </select></span>
     <div class="total-mo" id="sum"></div>
   </div>
   <button class="go" id="go">Show my overview</button>
@@ -201,21 +226,59 @@ details.all .irow{display:flex;justify-content:space-between;padding:4px 0;borde
 <script>
 const POPULAR=["openai","netflix","amazon","apple","uber","spotify","starbucks","flipkart","careem","zomato","disney","claude","tesla","zara","mcdonalds"];
 const LIFE=Object.keys(M).filter(k=>M[k].group==="life");
+const AI_TREND=["higgsfield","perplexity","cursor","runway","suno","elevenlabs","lovable","midjourney","gemini","grok","kling","characterai"];
 let lines=[];          // [{k, p, amt}]
-let market="ALL", mode="summary", flowIdx=0;
+let market="ALL", mode="summary", flowIdx=0, period=2;
+const API_BASE = /github\.io$|^localhost$|^127\.|^$/.test(location.hostname) ? "https://spend-analysis.madmarketagents.workers.dev" : "";
+const b64e = o => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const b64d = t => JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g,"+").replace(/_/g,"/")))));
+
+/* ---------- Live data: App Store trending (Apple RSS) and brand ownership (Wikidata via our Worker) ---------- */
+const APPSTORE_CC={US:"us",UK:"gb",EU:"de",AE:"ae",SA:"sa",IN:"in",JP:"jp",XX:"us"};
+const APP_ARCH={"Games":"games","Entertainment":"streaming","Music":"music","Finance":"fintech","Shopping":"ecommerce","Food & Drink":"delivery","Travel":"hotel","Sports":"streaming"};
+const ALIAS={chatgpt:"openai","claude by anthropic":"claude","hbo max":"max",tiktok:"tiktokshop","google one":"gemini","google gemini":"gemini","amazon prime video":"primevideo","prime video":"primevideo",
+  "disney+":"disney",youtube:"youtube","youtube music":"ytmusic",linkedin:"linkedin",duolingo:"duolingo","capcut":"capcut","character ai":"characterai","perplexity":"perplexity","grok":"grok","microsoft copilot":"copilot"};
+function matchBrand(app){
+  const n=app.toLowerCase().split(/\s[-–—|:]\s|:\s|\s-\s/)[0].replace(/[®™]/g,"").trim();
+  if(n in ALIAS) return ALIAS[n];
+  return Object.keys(M).find(k=>!M[k].custom&&!M[k].group&&(M[k].name.toLowerCase()===n||(n.length>=4&&M[k].name.toLowerCase().split(" (")[0]===n)))||null;
+}
+let trending={cc:null,apps:[]};
+async function loadTrending(){
+  const cc=APPSTORE_CC[COUNTRY]; if(trending.cc===cc) return;
+  trending={cc,apps:[]};
+  try{
+    const d=await (await fetch(`https://itunes.apple.com/${cc}/rss/topgrossingapplications/limit=30/json`)).json();
+    trending.apps=(d.feed.entry||[]).map(e=>({name:e["im:name"].label.split(/\s[-–—|:]\s|:\s/)[0].trim(),full:e["im:name"].label,dev:e["im:artist"]?.label||"",cat:e.category?.attributes?.label||"",icon:(e["im:image"]||[]).slice(-1)[0]?.label}));
+  }catch(e){ trending.apps=[]; }
+  if(!$("#q").value.trim()) renderTiles();
+}
+const LOOK={};
+async function lookupBrand(q){
+  const key=q.toLowerCase(); if(LOOK[key]) return LOOK[key];
+  LOOK[key]={pending:true};
+  try{ LOOK[key]=await (await fetch(API_BASE+"/api/lookup?q="+encodeURIComponent(q))).json(); }catch(e){ LOOK[key]={found:false,error:true}; }
+  return LOOK[key];
+}
+function addFromLookup(name, arch, res){
+  const k=addCustom(name, arch, res&&res.found?{owners:res.owners,site:res.site,qid:res.qid}:{});
+  if(!lines.some(l=>l.k===k)) addLine(k);
+  return k;
+}
 
 /* ---------- URL state: #s=brand.product:amount,... (custom brands as x~Name~category) ---------- */
 function readHash(){
   const h=new URLSearchParams(location.hash.slice(1));
   if(REG[h.get("m")]) market=h.get("m");
+  if(COUNTRIES[h.get("c")]) COUNTRY=h.get("c");
   return (h.get("s")||"").split(",").filter(Boolean).map(tok=>{
     const [key,amt]=tok.split(":"); let [k,p]=key.split(".");
-    if(k.startsWith("x~")){ const [,name,a]=k.split("~"); if(!ARCH[a]) return null; k=addCustom(decodeURIComponent(name),a); }
+    if(k.startsWith("x~")){ try{ const c=b64d(k.slice(2)); if(!ARCH[c.a]) return null; k=addCustom(c.n,c.a,{owners:c.o,site:c.s,qid:c.q}); }catch(e){ return null; } }
     return M[k]&&+amt>0 ? {k,p:product(k,p).id,amt:+amt} : null;
   }).filter(Boolean);
 }
-const keyOf = l => (M[l.k].custom ? `x~${encodeURIComponent(M[l.k].name)}~${M[l.k].arch}` : l.k)+"."+l.p;
-const writeHash = () => history.replaceState(null,"",`#s=${lines.filter(l=>l.amt>0).map(l=>`${keyOf(l)}:${l.amt}`).join(",")}${market!=="ALL"?`&m=${market}`:""}`);
+const keyOf = l => { const m=M[l.k]; return (m.custom ? "x~"+b64e({n:m.name,a:m.arch,o:m.ownersInfo||[],s:MDOM[l.k],q:(m.src[0]||[])[1]?.split("/").pop()}) : l.k)+"."+l.p; };
+const writeHash = () => history.replaceState(null,"",`#s=${lines.filter(l=>l.amt>0).map(l=>`${keyOf(l)}:${l.amt}`).join(",")}${market!=="ALL"?`&m=${market}`:""}&c=${COUNTRY}`);
 
 /* ---------- Step 1: pick ---------- */
 const tile = k => `<button class="tile ${lines.some(l=>l.k===k)?"on":""}" data-k="${k}">${mLogo(k,"lg")}${esc(M[k].name.replace(/^Trip to /,"").replace(/ \/.*$/,""))}</button>`;
@@ -223,17 +286,29 @@ function renderTiles(){
   const q=$("#q").value.trim(), ql=q.toLowerCase();
   let html="";
   if(!q){
-    html=`<div class="glabel">Popular brands</div><div class="tiles">${POPULAR.map(tile).join("")}</div>
+    const tr=trending.apps.slice(0,20).map((a,i)=>{ const k=matchBrand(a.full)||matchBrand(a.name);
+      return k ? tile(k) : `<button class="tile" data-app="${i}"><img class="ico" src="${esc(a.icon||"")}" alt="" loading="lazy">${esc(a.name.slice(0,22))}<small>${esc(a.cat)}</small></button>`; }).join("");
+    html=`${tr?`<div class="glabel">Trending now · top-grossing apps in the ${esc(COUNTRIES[COUNTRY]==="Other / global"?"US":COUNTRIES[COUNTRY])} App Store</div><div class="tiles trend">${tr}</div>`:""}
+      <div class="glabel">Popular brands</div><div class="tiles">${POPULAR.map(tile).join("")}</div>
+      <div class="glabel">Trending in AI</div><div class="tiles">${AI_TREND.map(tile).join("")}</div>
       <div class="glabel">Everyday life & travel</div><div class="tiles">${LIFE.map(tile).join("")}</div>`;
   } else {
     const hits=Object.keys(M).filter(k=>!M[k].custom&&(M[k].name.toLowerCase().includes(ql)||k.includes(ql.replace(/[^a-z0-9]/g,"")))).slice(0,20);
     const exact=hits.some(k=>M[k].name.toLowerCase()===ql);
-    html=`<div class="tiles">${hits.map(tile).join("")}${exact?"":`<div class="addc"><p>${hits.length?"Not the one?":"We don't have <b>"+esc(q)+"</b> yet."} Add <b>${esc(q)}</b> as:</p>
+    const L=q.length>=3?LOOK[ql]:null;
+    const lk = !L||L.pending ? (q.length>=3?`<p class="lk">Checking who owns ${esc(q)}…</p>`:"")
+      : L.found && L.owners?.length ? `<p class="lk">Wikidata: <b>${esc(L.name)}</b> (${esc(L.description)}) is owned by <b>${L.owners.map(o=>esc(o.name)+" ("+esc(o.ticker)+" · "+esc(o.exchange)+")").join(", ")}</b>.</p>`
+      : L.found ? `<p class="lk">Wikidata: <b>${esc(L.name)}</b> (${esc(L.description)}). No listed owner found, so it's likely private and we'll estimate it.</p>`
+      : `<p class="lk">No ownership record found. We'll treat it as private and estimate it.</p>`;
+    html=`<div class="tiles">${hits.map(tile).join("")}${exact?"":`<div class="addc">${lk}<p>${hits.length?"Not the one?":"We don't have <b>"+esc(q)+"</b> curated yet."} Add <b>${esc(q)}</b> as:</p>
       <div class="chips">${CUSTOM_ARCH.map(a=>`<button class="chipbtn" data-a="${a}">${ARCH[a].l}</button>`).join("")}</div></div>`}</div>`;
   }
   $("#tiles").innerHTML=html;
   $("#tiles").querySelectorAll(".tile").forEach(b=>b.onclick=()=>toggle(b.dataset.k));
-  $("#tiles").querySelectorAll(".chipbtn").forEach(b=>b.onclick=()=>{ const k=addCustom(q,b.dataset.a); if(!lines.some(l=>l.k===k)) addLine(k); $("#q").value=""; renderTiles(); });
+  $("#tiles").querySelectorAll(".chipbtn").forEach(b=>b.onclick=async()=>{ const res=await lookupBrand(q); addFromLookup(res.found&&res.name?res.name:q,b.dataset.a,res); $("#q").value=""; renderTiles(); });
+  $("#tiles").querySelectorAll("[data-app]").forEach(b=>b.onclick=async()=>{ const a=trending.apps[+b.dataset.app]; b.style.opacity=.5;
+    const res=await lookupBrand(a.name); addFromLookup(a.name, APP_ARCH[a.cat]||"software", res); renderTiles(); });
+  if(q.length>=3 && !LOOK[ql]) { clearTimeout(renderTiles.t); renderTiles.t=setTimeout(()=>lookupBrand(q).then(()=>{ if($("#q").value.trim().toLowerCase()===ql) renderTiles(); }),450); }
 }
 function addLine(k,pid){ const p=product(k,pid); lines.push({k,p:p.id,amt:p.price}); renderLines(); }
 function toggle(k){
@@ -248,7 +323,7 @@ function renderLines(){
     const ps=products(l.k), p=product(l.k,l.p), last=!lines.slice(i+1).some(x=>x.k===l.k);
     const unused=ps.filter(x=>!lines.some(y=>y.k===l.k&&y.p===x.id));
     return `<div class="line">${mLogo(l.k)}
-      <div class="mid"><div class="nm">${esc(M[l.k].name)}${M[l.k].custom?'<span class="est">estimate</span>':""}</div>
+      <div class="mid"><div class="nm">${esc(M[l.k].name)}${M[l.k].private?'<span class="est">private · estimated</span>':M[l.k].custom?'<span class="est">estimate</span>':""}</div>
         <div class="presets">${ps.map(x=>`<button class="preset ${x.id===l.p?"on":""}" data-i="${i}" data-p="${x.id}">${esc(x.n)}</button>`).join("")}</div></div>
       <label class="amount"><span>$</span><input inputmode="decimal" data-i="${i}" value="${l.amt}" aria-label="${esc(M[l.k].name)} amount"><span>${p.once?"once":"/mo"}</span></label>
       <button class="x" data-i="${i}" aria-label="Remove">×</button></div>
@@ -319,6 +394,9 @@ function renderSummary(R){
     <h2>Companies you fund most <small>per year${market!=="ALL"?` · ${REG[market]}`:""}</small></h2>
     <div id="topCos"></div>
 
+    <h2>If you'd invested it instead <span class="periods">${[1,2,3].map(y=>`<button data-y="${y}" class="${y===period?"on":""}">${y}Y</button>`).join("")}</span></h2>
+    <div id="returns"><p class="sub">Loading price history…</p></div>
+
     <h2>Invest alongside your spending <small>illustrative split</small></h2>
     <div class="basket">Invest <label class="amount"><span>$</span><input id="bamt" inputmode="decimal" value="${basketDefault}"><span>/mo</span></label> across the top companies you fund:</div>
     <div id="basket"></div>
@@ -328,11 +406,12 @@ function renderSummary(R){
       const v=view(l.k,l.p), root=v.root, kids=root.children||[], claimed=kids.reduce((s,c)=>s+c.pct,0);
       const buckets=[{node:{...root,children:[],name:`Kept by ${v.name}`,cat:v.cat,cos:[...(root.cos||[]),...(root.owners||[])]},usd:l.amt*(100-claimed)/100},
         ...kids.map(c=>({node:c,usd:l.amt*c.pct/100}))].filter(b=>b.usd>0.001).sort((a,b)=>b.usd-a.usd);
-      return `<div class="brand ${i===0?"open":""}"><button class="bh">${mLogo(l.k)}<div class="main"><div style="font-weight:500">${esc(v.name)} · ${esc(v.pname)}${M[l.k].custom?'<span class="est">estimate</span>':""}</div><div class="muted" style="font-size:13px">${v.stats[0][0]} · ${esc(v.stats[0][1])}</div></div><span class="num">${fmt(l.amt)}${v.once?"":"/mo"}</span><span class="chev">›</span></button>
-        <div class="bb"><p class="note">${esc(v.insight)}</p>
+      return `<div class="brand ${i===0?"open":""}"><button class="bh">${mLogo(l.k)}<div class="main"><div style="font-weight:500">${esc(v.name)} · ${esc(v.pname)}${M[l.k].private?'<span class="est">private · estimated</span>':M[l.k].custom?'<span class="est">estimate</span>':""}</div><div class="muted" style="font-size:13px">${v.stats[0][0]} · ${esc(v.stats[0][1])}</div></div><span class="num">${fmt(l.amt)}${v.once?"":"/mo"}</span><span class="chev">›</span></button>
+        <div class="bb">${M[l.k].private?`<p class="pnote"><b>Private company, estimated.</b> ${esc(PRIVATE_NOTE.replace("This company is private, so its financials aren't public. ",""))}</p>`:""}<p class="note">${esc(v.insight)}</p>
           <div class="facts">${v.stats.map(([a,b])=>`<div><b>${esc(a)}</b>${esc(b)}</div>`).join("")}</div>
           ${v.mix?`<div class="mix"><div class="lbl">${esc(v.mixLabel)}</div>${v.mix.map(([n,p])=>`<div class="mrow"><span>${esc(n)}</span><span class="trk"><i style="width:${p}%"></i></span><span class="num">${p}%</span></div>`).join("")}</div>`:""}
           ${buckets.map(b=>nodeHTML(b.node,b.usd,l.amt,v)).join("")}
+          ${waysHTML(l.k)}
           ${v.src.length?`<p class="src" style="margin-top:10px">Sources: ${v.src.map(([t,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`).join(" · ")}</p>`:""}</div></div>`;}).join("")}
 
     <h2>Tokens linked to your spending <small>very high risk</small></h2>
@@ -356,16 +435,80 @@ function renderSummary(R){
     $("#basket").querySelectorAll(".buy").forEach(b=>b.onclick=()=>openBuy(b.dataset.tk)); };
   drawBasket(); $("#bamt").oninput=drawBasket;
   $("#modeBody").querySelectorAll(".bh").forEach(b=>b.onclick=()=>b.parentElement.classList.toggle("open"));
+  $("#modeBody").querySelectorAll(".wchip").forEach(b=>b.onclick=()=>openBuy(b.dataset.tk));
+  $("#modeBody").querySelectorAll(".periods button").forEach(b=>b.onclick=()=>{ period=+b.dataset.y; $("#modeBody").querySelectorAll(".periods button").forEach(x=>x.classList.toggle("on",x===b)); drawReturns(R); });
+  loadPrices().then(()=>drawReturns(R));
   $("#modeBody").querySelectorAll(".nh").forEach(b=>b.onclick=()=>b.parentElement.classList.toggle("open"));
   $("#share").onclick=async e=>{ try{ await navigator.clipboard.writeText(location.href); e.target.textContent="Link copied"; }catch(_){ e.target.textContent="Copy the URL from the address bar"; } };
   $("#reset").onclick=()=>{ lines=[]; addLine("openai"); history.replaceState(null,"",location.pathname); $("#result").classList.remove("show"); renderTiles(); scrollTo({top:0,behavior:"smooth"}); };
+}
+
+/* ---------- Ways to invest (works for private companies too) ---------- */
+function waysHTML(k){
+  const w=waysToInvest(k), m=M[k], chip=t=>`<button class="wchip" data-tk="${esc(t)}">${cLogo(t,"sm")}<b>${esc(CO[t].n)}</b><i>${esc(t)}</i></button>`;
+  const groups=[[`Buy ${m.name} directly`,w.direct],[`Listed investors in ${m.name}`,w.investors],["Suppliers & enablers it pays",w.suppliers],["Listed competitors",w.peers],["Industry ETFs",w.etfs]].filter(g=>g[1].length);
+  return `<div class="ways"><h5 style="margin-top:6px;color:var(--text);font-weight:600">How to invest in ${esc(m.name)}${m.private?" (it's private)":""}</h5>
+    ${groups.map(([t,l])=>`<h5>${esc(t)}</h5>${l.map(chip).join("")}`).join("")}
+    ${m.private?`<p class="pre">Pre-IPO: shares of private companies sometimes trade on secondary marketplaces (for example EquityZen or Forge). These are usually limited to accredited investors, illiquid and high risk.</p>`:""}</div>`;
+}
+
+/* ---------- Returns: "if you'd invested what you spent" ---------- */
+let PRICES=null;
+async function loadPrices(){
+  if(PRICES) return PRICES;
+  for(const u of [API_BASE+"/api/prices","prices.json"]){ try{ const r=await fetch(u); if(r.ok){ PRICES=await r.json(); return PRICES; } }catch(e){} }
+  PRICES={s:{},asof:""}; return PRICES;
+}
+const MONTH=30.4375*86400;
+function priceAt(t,ts){ const a=PRICES.s[t]; if(!a) return null; let p=null; for(const [x,c] of a){ if(x<=ts+4*86400) p=c; else break; } return p; }
+const lastPx = t => { const a=PRICES.s[t]; return a?a[a.length-1][1]:null; };
+function simulate(R, years){
+  const now=(PRICES.s.SPY||[[Date.now()/1000]]).slice(-1)[0][0], N=years*12;
+  const per={}, lines=[]; const bench={SPY:0,URTH:0}; let invested=0, value=0;
+  R.ls.forEach(l=>{
+    const w={}; flow(l.k,1,l.p).forEach(f=>{ const c=f.node.cos||[]; c.forEach(t=>{ if(PRICES.s[t]&&(market==="ALL"||CO[t].r===market)) w[t]=(w[t]||0)+f.listed/c.length; }); });
+    if(!Object.keys(w).length){ lines.push({l,skip:true}); return; }
+    const contribs = isOnce(l) ? [[0,l.amt]] : Array.from({length:N},(_,m)=>[m,l.amt]);
+    let li=0, lv=0;
+    contribs.forEach(([m,c])=>{
+      const ts=now-(N-m)*MONTH, avail=Object.entries(w).map(([t,x])=>[t,x,priceAt(t,ts)]).filter(z=>z[2]);
+      const tot=avail.reduce((s,z)=>s+z[1],0); if(!tot) return;
+      avail.forEach(([t,x,p])=>{ const amt=c*x/tot, o=per[t]||(per[t]={inv:0,units:0}); o.inv+=amt; o.units+=amt/p; li+=amt; lv+=amt/p*lastPx(t); });
+      for(const b of ["SPY","URTH"]){ const p=priceAt(b,ts); if(p) bench[b]+=c/p; }
+    });
+    invested+=li; value+=lv; lines.push({l,inv:li,val:lv,months:contribs.length});
+  });
+  const benchVal={SPY:bench.SPY*lastPx("SPY"),URTH:bench.URTH*lastPx("URTH")};
+  const cos=Object.entries(per).map(([t,o])=>({t,inv:o.inv,val:o.units*lastPx(t),chg:(lastPx(t)/priceAt(t,now-N*MONTH)-1)})).sort((a,b)=>b.inv-a.inv);
+  return {invested,value,benchVal,lines,cos,years};
+}
+function drawReturns(R){
+  const el=$("#returns"); if(!el) return;
+  if(!PRICES||!Object.keys(PRICES.s).length){ el.innerHTML=`<p class="sub">Price history is unavailable right now.</p>`; return; }
+  const S=simulate(R,period); if(!S.invested){ el.innerHTML=`<p class="sub">None of these purchases reach companies with price history${market!=="ALL"?" in "+REG[market]:""}.</p>`; return; }
+  const pct=(v,i)=>{ const x=(v/i-1)*100; return `<span class="${x>=0?"up":"dn"}">${x>=0?"+":""}${x.toFixed(1)}%</span>`; };
+  const moTxt=R.mo?`the ${fmt(R.mo)} a month you spend`:"", onTxt=R.once?`${R.mo?" plus ":""}your ${fmt(R.once)} of one-off purchases`:"";
+  el.innerHTML=`<p class="rbig">If you'd invested ${moTxt}${onTxt} in the companies behind it, starting ${S.years} year${S.years>1?"s":""} ago, your ${fmt0(S.invested)} would be worth <b>${fmt0(S.value)}</b> today (${pct(S.value,S.invested)}).</p>
+    <div class="rcards">
+      <div class="rcard me"><small>Your spending basket</small><b class="num">${fmt0(S.value)}</b>${pct(S.value,S.invested)}</div>
+      <div class="rcard"><small>Same money in the S&amp;P 500 (SPY)</small><b class="num">${fmt0(S.benchVal.SPY)}</b>${pct(S.benchVal.SPY,S.invested)}</div>
+      <div class="rcard"><small>Same money in MSCI World (URTH)</small><b class="num">${fmt0(S.benchVal.URTH)}</b>${pct(S.benchVal.URTH,S.invested)}</div>
+    </div>
+    ${S.lines.map(x=>x.skip?`<div class="row">${mLogo(x.l.k,"sm")}<div class="main"><div class="t" style="font-size:14px">${esc(M[x.l.k].name)} · ${esc(product(x.l.k,x.l.p).n)}</div><div class="s">No listed companies with price history</div></div></div>`
+      :`<div class="row">${mLogo(x.l.k,"sm")}<div class="main"><div class="t" style="font-size:14px">${esc(M[x.l.k].name)} · ${esc(product(x.l.k,x.l.p).n)}</div><div class="s">${isOnce(x.l)?`${fmt(x.l.amt)} once, ${S.years}y ago`:`${fmt(x.l.amt)}/mo × ${x.months} months`} = ${fmt0(x.inv)} invested</div></div><div class="r num">${fmt0(x.val)}<small>${pct(x.val,x.inv)}</small></div></div>`).join("")}
+    <details class="all"><summary>Company by company (${S.cos.length})</summary>${S.cos.slice(0,40).map(c=>`<div class="irow"><span>${esc(CO[c.t].n)} <span style="color:var(--faint)">${esc(c.t)}</span></span><span class="num">${fmt0(c.inv)} → ${fmt0(c.val)} · share price ${isFinite(c.chg)?(c.chg>=0?"+":"")+(c.chg*100).toFixed(0)+"%":"n/a"}</span></div>`).join("")}</details>
+    <p class="src">Monthly closing prices from Yahoo Finance${PRICES.asof?` (as of ${esc(PRICES.asof)})`:""}. Each month's money is split across the listed companies your purchase funds, weighted by how much reaches each. Price change only: dividends, currency moves, fees and taxes are ignored. Companies without price history are left out. Past performance doesn't predict future returns.</p>`;
 }
 
 $("#q").oninput=renderTiles;
 $("#market").onchange=e=>{ market=e.target.value; if($("#result").classList.contains("show")) showResult(false); };
 $("#go").onclick=()=>showResult(true);
 const fromHash=readHash();
+$("#country").innerHTML=Object.entries(COUNTRIES).map(([c,n])=>`<option value="${c}">I live in: ${n}</option>`).join("");
+$("#country").value=COUNTRY;
+$("#country").onchange=e=>{ COUNTRY=e.target.value; loadTrending(); renderTiles(); if($("#result").classList.contains("show")) showResult(false); };
 $("#market").value=market;
+loadTrending();
 if(fromHash.length){ lines=fromHash; renderLines(); } else addLine("openai");
 renderTiles();
 if(fromHash.length) showResult(false);

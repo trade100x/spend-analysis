@@ -326,7 +326,7 @@ Object.assign(M, {
       {name:"Packaged food & household brands",pct:35,cat:"cpg",cos:["NESN.SW","PEP","ULVR.L","MDLZ","KO","PG"],desc:"The branded products on the shelves",children:[
         {name:"Farms & ingredients",pct:30,cat:"agri",cos:["ADM","BG","DE","NTR"],desc:"Grain, oilseeds, fertilizer, tractors"},
         {name:"Packaging",pct:12,cat:"materials",cos:["AMCR","BALL"],desc:"Plastic, cartons, cans"}]},
-      {name:"The grocer",pct:30,cat:"grocer",cos:["WMT","COST","KR","AMZN","AD.AS","TSCO.L"],desc:"Walmart, Costco, Kroger, Whole Foods, Ahold Delhaize, Tesco",children:[
+      {name:"The grocer",pct:30,cat:"grocer",cos:["WMT","COST","KR","AMZN","AD.AS","TSCO.L"],desc:"Where you shop",local:{US:["WMT","COST","KR","AMZN"],UK:["TSCO.L","SBRY.L","OCDO.L"],EU:["CA.PA","AD.AS"],AE:["SPINNEYS.DFM","LULU.AD","CA.PA"],SA:["4001.SR"],IN:["DMART.NS","RELIANCE.NS","ETERNAL.NS"],JP:["3382.T","8267.T"]},children:[
         {name:"Store staff",pct:45,cat:"labor",cos:[],desc:"Cashiers, stockers, butchers"},
         {name:"Refrigeration & energy",pct:8,cat:"power",cos:["CARR"],desc:"Cold chain and store power"}]},
       {name:"Fresh produce, meat & dairy",pct:22,cat:"agri",cos:["TSN","DOLE","BN.PA"],desc:"Meat packers, fruit growers, dairies (many private farms)"},
@@ -394,9 +394,9 @@ Object.assign(M, {
     src:[["U.S. EIA electricity data","https://www.eia.gov/electricity/"]],
     products:[{id:"apt",n:"Apartment",price:90},{id:"house",n:"House",price:180},{id:"ev",n:"House + EV",price:260}],
     root:{cos:[],desc:"",children:[
-      {name:"Your utility",pct:20,cat:"utility",cos:["NEE","DUK","IBE.MC","ENEL.MI"],desc:"Regulated return, billing, local wires"},
-      {name:"Generation & fuel",pct:45,cat:"power",cos:["CEG","VST"],desc:"Power plants",children:[
-        {name:"Natural gas",pct:40,cat:"energy",cos:["EQT","LNG"],desc:"Largest US fuel source"},
+      {name:"Your utility",pct:20,cat:"utility",cos:["NEE","DUK","IBE.MC","ENEL.MI"],desc:"Regulated return, billing, local wires",local:{US:["NEE","DUK"],UK:["NG.L","SSE.L","CNA.L"],EU:["IBE.MC","ENEL.MI","EOAN.DE","ENGI.PA"],AE:["DEWA.DFM","TAQA.AD","EMPOWER.DFM"],SA:["5110.SR"],IN:["NTPC.NS","TATAPOWER.NS","POWERGRID.NS"],JP:["9501.T","9503.T"]}},
+      {name:"Generation & fuel",pct:45,cat:"power",cos:["CEG","VST"],desc:"Power plants",local:{UK:["SSE.L","RWE.DE"],EU:["RWE.DE","ENGI.PA","IBE.MC"],AE:["DEWA.DFM","TAQA.AD"],SA:["5110.SR","2082.SR"],IN:["NTPC.NS","ADANIPOWER.NS","TATAPOWER.NS"],JP:["9501.T","9503.T"]},children:[
+        {name:"Natural gas",pct:40,cat:"energy",cos:["EQT","LNG"],desc:"Main fuel for power plants in many countries",local:{AE:["ADNOCGAS.AD"],SA:["2222.SR"],IN:["COALINDIA.NS"],UK:["SHEL.L"],EU:["SHEL.L","ENI.MI"],JP:["SHEL.L"]}},
         {name:"Nuclear fuel",pct:10,cat:"energy",cos:["CCJ"],desc:"Uranium"},
         {name:"Solar & wind equipment",pct:20,cat:"power",cos:["FSLR","VWS.CO"],desc:"Panels and turbines"}]},
       {name:"Grid & transmission",pct:30,cat:"grid",cos:["GEV","ENR.DE","6501.T","PWR","PRY.MI"],desc:"Transformers, lines, substations, cables"},
@@ -417,6 +417,55 @@ Object.assign(M, {
       {name:"Payments",pct:3,cat:"payments",cos:["V","MA"],desc:"Card fees"}]}},
 });
 
+
+/* ---------- Local companies: where you live changes who you pay ---------- */
+Object.assign(CO, {
+  "DEWA.DFM":{n:"Dubai Electricity & Water Authority",x:"DFM",r:"ME",w:"Dubai's electricity and water utility (DEWA)"},
+  "TAQA.AD":{n:"TAQA",x:"ADX",r:"ME",w:"Abu Dhabi's national energy and utilities group"},
+  "EMPOWER.DFM":{n:"Empower",x:"DFM",r:"ME",w:"Dubai district cooling, billed to many apartments"},
+  "ADNOCGAS.AD":{n:"ADNOC Gas",x:"ADX",r:"ME",w:"Supplies natural gas for UAE power plants"},
+  "5110.SR":{n:"Saudi Electricity",x:"Tadawul",r:"ME",w:"Saudi Arabia's national power utility"},
+  "2082.SR":{n:"ACWA Power",x:"Tadawul",r:"ME",w:"Power and water desalination developer"},
+  "NG.L":{n:"National Grid",x:"LSE",r:"EU",w:"Runs the UK's electricity transmission network"},
+  "SSE.L":{n:"SSE",x:"LSE",r:"EU",w:"UK power networks and renewables"},
+  "CNA.L":{n:"Centrica (British Gas)",x:"LSE",r:"EU",w:"UK's largest energy supplier"},
+  "EOAN.DE":{n:"E.ON",x:"XETRA",r:"EU",w:"European energy networks and retail"},
+  "RWE.DE":{n:"RWE",x:"XETRA",r:"EU",w:"Major European power generator"},
+  "ENGI.PA":{n:"Engie",x:"Euronext PAR",r:"EU",w:"French utility"},
+  "NTPC.NS":{n:"NTPC",x:"NSE",r:"AP",w:"India's largest power generator"},
+  "TATAPOWER.NS":{n:"Tata Power",x:"NSE",r:"AP",w:"Indian power generation and distribution"},
+  "POWERGRID.NS":{n:"Power Grid Corporation",x:"NSE",r:"AP",w:"India's national transmission grid"},
+  "COALINDIA.NS":{n:"Coal India",x:"NSE",r:"AP",w:"Supplies most of India's power-plant coal"},
+  "ADANIPOWER.NS":{n:"Adani Power",x:"NSE",r:"AP",w:"Large private Indian power generator"},
+  "9501.T":{n:"Tokyo Electric Power (TEPCO)",x:"TSE",r:"AP",w:"Tokyo's electricity utility"},
+  "9503.T":{n:"Kansai Electric Power",x:"TSE",r:"AP",w:"Osaka-region electricity utility"},
+  "SPINNEYS.DFM":{n:"Spinneys",x:"DFM",r:"ME",w:"UAE premium supermarket chain"},
+  "LULU.AD":{n:"Lulu Retail",x:"ADX",r:"ME",w:"Gulf hypermarket chain"},
+  "4001.SR":{n:"Abdullah Al Othaim Markets",x:"Tadawul",r:"ME",w:"Saudi supermarket chain"},
+  "DMART.NS":{n:"Avenue Supermarts (DMart)",x:"NSE",r:"AP",w:"Indian supermarket chain"},
+  "SBRY.L":{n:"Sainsbury's",x:"LSE",r:"EU",w:"UK's second-largest grocer"},
+  "OCDO.L":{n:"Ocado",x:"LSE",r:"EU",w:"UK online grocery and warehouse tech"},
+  "8267.T":{n:"Aeon",x:"TSE",r:"AP",w:"Japan's largest retail group"},
+});
+Object.assign(DOM, {"DEWA.DFM":"dewa.gov.ae","TAQA.AD":"taqa.com","EMPOWER.DFM":"empower.ae","ADNOCGAS.AD":"adnocgas.ae","5110.SR":"se.com.sa","2082.SR":"acwapower.com",
+  "NG.L":"nationalgrid.com","SSE.L":"sse.com","CNA.L":"centrica.com","EOAN.DE":"eon.com","RWE.DE":"rwe.com","ENGI.PA":"engie.com","NTPC.NS":"ntpc.co.in",
+  "TATAPOWER.NS":"tatapower.com","POWERGRID.NS":"powergrid.in","COALINDIA.NS":"coalindia.in","ADANIPOWER.NS":"adanipower.com","9501.T":"tepco.co.jp","9503.T":"kepco.co.jp",
+  "SPINNEYS.DFM":"spinneys.com","LULU.AD":"luluhypermarket.com","4001.SR":"othaimmarkets.com","DMART.NS":"dmartindia.com","SBRY.L":"sainsburys.co.uk","OCDO.L":"ocadogroup.com","8267.T":"aeon.info"});
+const COUNTRIES = {US:"United States",UK:"United Kingdom",EU:"Europe (EU)",AE:"UAE",SA:"Saudi Arabia",IN:"India",JP:"Japan",XX:"Other / global"};
+let COUNTRY = (()=>{ try{
+  const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||"";
+  if(tz==="Asia/Dubai") return "AE"; if(tz==="Asia/Riyadh") return "SA"; if(/Asia\/(Kolkata|Calcutta)/.test(tz)) return "IN"; if(tz==="Asia/Tokyo") return "JP";
+  if(tz==="Europe/London") return "UK"; if(tz.startsWith("Europe/")) return "EU"; if(tz.startsWith("America/")) return "US";
+}catch(e){} return "XX"; })();
+// Swap in local companies for everyday categories (a node's `local` map, keyed by country)
+const _locCache = {};
+function localize(root){
+  if(COUNTRY==="XX") return root;
+  const key=COUNTRY; if(!root.__id) root.__id=Math.random().toString(36).slice(2);
+  const ck=root.__id+key; if(_locCache[ck]) return _locCache[ck];
+  const walk=n=>({...n, cos:(n.local&&n.local[key])||n.cos, children:(n.children||[]).map(walk)});
+  return _locCache[ck]=walk(root);
+}
 /* ---------- Product lookup ---------- */
 function products(k){ return M[k].products || [{id:"default",n:M[k].name,price:20}]; }
 function product(k,pid){ const ps=products(k); return ps.find(p=>p.id===pid)||ps[0]; }
@@ -424,7 +473,7 @@ function product(k,pid){ const ps=products(k); return ps.find(p=>p.id===pid)||ps
 function view(k,pid){
   const m=M[k], p=product(k,pid);
   return {k, p, name:m.name, pname:p.n, cat:m.cat, color:m.color, once:!!p.once,
-    root:p.root||m.root, insight:p.insight||m.insight,
+    root:m.group==="life"?localize(p.root||m.root):(p.root||m.root), insight:p.insight||m.insight,
     stats:p.stats?[...p.stats,...m.stats].slice(0,3):m.stats,
     tokens:p.tokens||m.tokens||[], tokenNote:p.tokenNote||m.tokenNote||"No credible token exposure.",
     mix:m.mix, mixLabel:m.mixLabel, src:m.src||[]};
