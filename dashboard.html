@@ -26,6 +26,25 @@ header{display:flex;align-items:center;justify-content:space-between;padding:28p
 .card-id{color:var(--faint);font-size:13px}
 
 .hero{padding:40px 0 32px}
+.hero-top{display:flex;align-items:center;gap:28px}
+.hero-txt{flex:1;min-width:0}
+.ccard{position:relative;flex:none;width:300px;aspect-ratio:1.586;border-radius:16px;padding:18px 20px;color:#f4f4f5;overflow:hidden;
+  background:radial-gradient(120% 90% at 100% 0%,#3f3f46 0%,transparent 55%),linear-gradient(135deg,#18181b 0%,#09090b 100%);
+  box-shadow:0 18px 40px -12px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.06);display:flex;flex-direction:column;justify-content:space-between;transition:transform .3s ease}
+.ccard::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.09) 50%,transparent 65%);transform:translateX(-100%);transition:transform .8s ease}
+.ccard:hover{transform:translateY(-2px) rotate(-.5deg)}
+.ccard:hover::after{transform:translateX(100%)}
+.cc-row{display:flex;justify-content:space-between;align-items:center}
+.cc-brand{font-size:12px;font-weight:600;letter-spacing:.02em;opacity:.9}
+.cc-nfc{width:20px;height:20px;opacity:.7}
+.cc-chip{width:40px;height:30px;border-radius:6px;background:linear-gradient(135deg,#e7d59a,#b8964f 60%,#dcc584);position:relative;display:grid;grid-template-rows:repeat(3,1fr);padding:5px 0;opacity:.95}
+.cc-chip i{border-top:1px solid rgba(80,60,20,.35)}
+.cc-num{font-family:ui-monospace,Menlo,monospace;font-size:16px;letter-spacing:.12em;opacity:.95}
+.cc-foot{align-items:flex-end;font-size:11px;letter-spacing:.06em}
+.cc-foot small{display:block;font-size:8px;opacity:.55;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.cc-visa{font-style:italic;font-weight:800;font-size:20px;letter-spacing:.02em}
+@media (max-width:620px){ .hero-top{flex-direction:column;align-items:flex-start;gap:24px} .ccard{width:100%;max-width:340px} }
+
 .hero .eyebrow{color:var(--muted);font-size:13px}
 .hero .total{font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1.1;margin:6px 0 8px}
 .hero p{margin:0;color:var(--muted)}
@@ -123,12 +142,22 @@ body.open{overflow:hidden}
 </head>
 <body>
 <div class="wrap">
-  <header><a class="wordmark" href="./" style="text-decoration:none">Spend Analysis</a><div class="card-id">Visa •• 4821</div></header>
+  <header><a class="wordmark" href="./" style="text-decoration:none">Spend Analysis</a><a class="card-id" href="./" style="text-decoration:none">Try it with your spending →</a></header>
 
   <div class="hero">
-    <div class="eyebrow">September 2026</div>
-    <div class="total num" id="total"></div>
-    <p id="heroLine"></p>
+    <div class="hero-top">
+      <div class="ccard" aria-label="Demo Visa card ending 4821">
+        <div class="cc-row"><span class="cc-brand">Spend Analysis</span><svg class="cc-nfc" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 7.5a6.5 6.5 0 0 1 0 9M12 5a10 10 0 0 1 0 14M15.5 2.5a13.5 13.5 0 0 1 0 19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+        <div class="cc-chip" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="cc-num">•••• •••• •••• 4821</div>
+        <div class="cc-row cc-foot"><span><small>Cardholder</small>DEMO USER</span><span><small>Expires</small>09/29</span><span class="cc-visa">VISA</span></div>
+      </div>
+      <div class="hero-txt">
+        <div class="eyebrow">September 2026</div>
+        <div class="total num" id="total"></div>
+        <p id="heroLine"></p>
+      </div>
+    </div>
     <div class="stack" id="stack"></div>
     <div class="legend" id="legend"></div>
   </div>
