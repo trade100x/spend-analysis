@@ -71,7 +71,7 @@ footer a{color:var(--faint)}
 
 /* sheet */
 .scrim{position:fixed;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
-.sheet{position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);background:var(--sheet);z-index:11;transform:translateX(100%);transition:transform .25s ease;overflow-y:auto;border-left:1px solid var(--line)}
+.sheet{position:fixed;top:0;right:0;bottom:0;width:min(620px,100%);background:var(--sheet);z-index:11;transform:translateX(100%);transition:transform .25s ease;overflow-y:auto;border-left:1px solid var(--line)}
 body.open .scrim{opacity:1;pointer-events:auto}
 body.open .sheet{transform:none}
 body.open{overflow:hidden}
@@ -84,6 +84,11 @@ body.open{overflow:hidden}
 .facts b{display:block;font-size:15px;font-weight:600}
 .facts span{color:var(--muted)}
 .note{color:var(--muted);font-size:14px;margin:0 0 8px}
+.vt{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:2px;margin:0 0 10px}
+.vt button{border:0;background:none;border-radius:99px;padding:4px 12px;font-size:12px;cursor:pointer;color:var(--muted)}
+.vt button.on{background:var(--text);color:var(--bg)}
+.buy{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:3px 10px;font-size:12px;cursor:pointer;margin-left:8px;flex:none}
+.buy:hover{background:var(--text);color:var(--bg)}
 .sheet h4{font-size:13px;font-weight:600;margin:28px 0 8px;color:var(--text)}
 
 .node{border-top:1px solid var(--line)}
@@ -150,39 +155,45 @@ body.open{overflow:hidden}
     <div class="proj" id="proj"></div>
   </section>
 
-  <footer>Demo with dummy card data. Company figures are approximate public numbers (Sep 2026), and supply-chain splits are modelled estimates. Not investment advice. Logos via Google's favicon service.
-    Sources: <a href="https://tomtunguz.com/openai-hardware-spending-2025-2035/" target="_blank" rel="noopener">Tunguz</a> · <a href="https://www.cnbc.com/2025/10/15/a-guide-to-1-trillion-worth-of-ai-deals-between-openai-nvidia.html" target="_blank" rel="noopener">CNBC</a> · <a href="https://valueaddvc.com/blog/openai-revenue-2026-20b-arr-4b-month-path-to-profitability" target="_blank" rel="noopener">OpenAI ARR</a> · <a href="https://coindcx.com/blog/crypto-highlights/top-ai-crypto-tokens/" target="_blank" rel="noopener">AI tokens</a> · company filings.</footer>
+  <footer><b>Not 100% accurate.</b> Demo with dummy card data. Company figures come from public filings and reputable reporting and may be out of date. Supply-chain splits are modelled estimates, not audited company data. Not investment advice. Broker links go to third parties we are not affiliated with. Logos via Google and DuckDuckGo favicon services.</footer>
 </div>
 
 <div class="scrim" id="scrim"></div>
 <aside class="sheet" id="sheet" aria-hidden="true"><div class="in" id="detail"></div></aside>
 
 <script src="shared.js"></script>
+<script src="catalog.js"></script>
+<script src="brands.js"></script>
+<script src="viz.js"></script>
 <script>
 /* ---------- Dummy transactions ---------- */
 const TX = [
   ["2026-09-27","starbucks","Starbucks #1142",6.45],
   ["2026-09-26","uber","Uber Trip",24.60],
+  ["2026-09-26","groceries","Whole Foods Market",142.30],
   ["2026-09-25","amazon","Amazon.com order",86.40],
-  ["2026-09-24","openai","OpenAI · ChatGPT Plus",20.00],
+  ["2026-09-24","openai.plus","OpenAI · ChatGPT Plus",20.00],
   ["2026-09-23","shell","Shell Station 0381",58.20],
   ["2026-09-22","starbucks","Starbucks #0877",5.95],
   ["2026-09-21","airbnb","Airbnb · 2 nights",412.00],
   ["2026-09-20","uber","Uber Trip",18.30],
   ["2026-09-19","spotify","Spotify Premium",11.99],
+  ["2026-09-18","zomato","Zomato order",18.40],
   ["2026-09-18","amazon","Amazon Marketplace",34.99],
   ["2026-09-17","netflix","Netflix Standard",17.99],
   ["2026-09-16","figma","Figma Professional",20.00],
   ["2026-09-15","starbucks","Starbucks #1142",7.10],
   ["2026-09-14","uber","Uber Trip",31.75],
-  ["2026-09-12","apple","Apple iCloud+ 2TB",9.99],
-  ["2026-09-11","amazon","Amazon.com order",129.00],
+  ["2026-09-12","apple.icloud","Apple iCloud+ 2TB",9.99],
+  ["2026-09-12","electricity","Con Edison · electricity",118.40],
+  ["2026-09-11","amazon.orders","Amazon.com order",129.00],
+  ["2026-09-09","groceries","Trader Joe's",96.75],
   ["2026-09-10","shell","Shell Station 0214",52.80],
   ["2026-09-08","starbucks","Starbucks #1142",6.45],
-  ["2026-09-05","openai","OpenAI · API usage",48.20],
+  ["2026-09-05","openai.api","OpenAI · API usage",48.20],
   ["2026-09-03","uber","Uber Trip",22.10],
-  ["2026-09-01","amazon","Amazon Prime",14.99],
-].map(([d,m,label,a],i)=>({id:i,d,m,label,a}));
+  ["2026-09-01","amazon.prime","Amazon Prime",14.99],
+].map(([d,key,label,a],i)=>{ const [m,p]=key.split("."); return {id:i,d,m,p:product(m,p).id,label,a}; });
 
 /* ---------- Personas: predicted future spending ---------- */
 // trig: merchant category that makes the prediction more likely; t: listed ticker if investable
@@ -240,9 +251,9 @@ const save = () => { try{ localStorage.setItem("spend-analysis",JSON.stringify(s
 
 function aggregate(txs){
   const cats={},cos={};
-  txs.forEach(t=>flow(t.m,t.a).forEach(f=>{
+  txs.forEach(t=>flow(t.m,t.a,t.p).forEach(f=>{
     cats[f.cat]=(cats[f.cat]||0)+f.own;
-    const l=f.node.cos||[]; l.forEach(tk=>{const c=cos[tk]||(cos[tk]={usd:0,via:new Set()}); c.usd+=f.own/l.length; c.via.add(M[t.m].name);});
+    const l=f.node.cos||[]; l.forEach(tk=>{const c=cos[tk]||(cos[tk]={usd:0,via:new Set()}); c.usd+=f.listed/l.length; c.via.add(M[t.m].name);});
   }));
   return {cats,cos};
 }
@@ -278,11 +289,11 @@ function renderTx(){
 }
 
 function openTx(id){
-  const t=TX.find(x=>x.id===id), mm=M[t.m], root=mm.root;
+  const t=TX.find(x=>x.id===id), mm=view(t.m,t.p), root=mm.root;
   const kids=root.children||[], claimed=kids.reduce((s,k)=>s+k.pct,0);
   const buckets=[{node:{...root,children:[],name:`Kept by ${mm.name}`,cat:mm.cat,desc:root.desc,cos:[...(root.cos||[]),...(root.owners||[])]},usd:t.a*(100-claimed)/100},
     ...kids.map(k=>({node:k,usd:t.a*k.pct/100}))].sort((a,b)=>b.usd-a.usd);
-  const cos={}; flow(t.m,t.a).forEach(f=>{const l=f.node.cos||[]; l.forEach(tk=>cos[tk]=(cos[tk]||0)+f.own/l.length);});
+  const cos={}; flow(t.m,t.a,t.p).forEach(f=>{const l=f.node.cos||[]; l.forEach(tk=>cos[tk]=(cos[tk]||0)+f.listed/l.length);});
   const ideas=Object.entries(cos).filter(([tk])=>inMarket(tk)).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const date=new Date(t.d+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
   $("#detail").innerHTML=`
@@ -293,11 +304,13 @@ function openTx(id){
     <p class="note">${esc(mm.insight)}</p>
 
     <h4>Where your ${fmt(t.a)} goes</h4>
+    <div class="vt"><button class="on" data-v="list">List</button><button data-v="flow">Money flow</button></div>
+    <div class="fv" id="dfv" style="display:none;margin-bottom:8px"></div><div id="dlist">
     <div class="stack" style="margin:4px 0 12px">${buckets.map(b=>`<span style="width:${b.usd/t.a*100}%;background:${CAT[b.node.cat||mm.cat].c}"></span>`).join("")}</div>
-    ${buckets.map(b=>nodeHTML(b.node,b.usd,t.a,mm)).join("")}
+    ${buckets.map(b=>nodeHTML(b.node,b.usd,t.a,mm)).join("")}</div>
 
     <h4>Stocks linked to this purchase${state.market!=="ALL"?` · ${REG[state.market]}`:""}</h4>
-    ${ideas.length?ideas.map(([tk,u])=>`<div class="row">${cLogo(tk)}<div class="main"><div class="t">${esc(CO[tk].n)} <span class="muted" style="font-weight:400;font-size:13px">${esc(tk)}</span></div><div class="s" style="white-space:normal">${esc(CO[tk].w)}</div></div><div class="r num">${fmt(u)}</div></div>`).join("")
+    ${ideas.length?ideas.map(([tk,u])=>`<div class="row">${cLogo(tk)}<div class="main"><div class="t">${esc(CO[tk].n)} <span class="muted" style="font-weight:400;font-size:13px">${esc(tk)}</span></div><div class="s" style="white-space:normal">${esc(CO[tk].w)}</div></div><div class="r num">${fmt(u)}</div><button class="buy" data-tk="${esc(tk)}">Buy</button></div>`).join("")
       :`<p class="note">No companies in this chain are listed in ${REG[state.market]}.</p>`}
 
     <h4>Tokens</h4>
@@ -307,6 +320,11 @@ function openTx(id){
     <h4>Sources</h4>
     <div class="src">${mm.src.map(([s,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(s)}</a>`).join(" · ")}</div>`;
   $("#detail").querySelectorAll(".nh").forEach(b=>b.onclick=()=>b.parentElement.classList.toggle("open"));
+  $("#detail").querySelectorAll(".buy").forEach(b=>b.onclick=()=>openBuy(b.dataset.tk));
+  $("#detail").querySelectorAll(".vt button").forEach(b=>b.onclick=()=>{
+    $("#detail").querySelectorAll(".vt button").forEach(x=>x.classList.toggle("on",x===b));
+    const f=b.dataset.v==="flow"; $("#dfv").style.display=f?"":"none"; $("#dlist").style.display=f?"none":"";
+    if(f) fvRender($("#dfv"),t.m,t.p,t.a); });
   $("#close").onclick=closeTx;
   $("#sheet").scrollTop=0; $("#sheet").setAttribute("aria-hidden","false");
   document.body.classList.add("open");

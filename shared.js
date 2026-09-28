@@ -7,8 +7,8 @@ const CO = {
   CRWV:{n:"CoreWeave",x:"NASDAQ",r:"AM",w:"GPU cloud; ~$22B in OpenAI contracts"},
   AMZN:{n:"Amazon",x:"NASDAQ",r:"AM",w:"AWS is the default cloud for most apps; $38B OpenAI deal"},
   GOOGL:{n:"Alphabet",x:"NASDAQ",r:"AM",w:"Google Cloud, Play Store and ads take a slice of many payments"},
-  NVDA:{n:"NVIDIA",x:"NASDAQ",r:"AM",w:"10 GW deployment with OpenAI; dominant AI accelerator supplier"},
-  AMD:{n:"AMD",x:"NASDAQ",r:"AM",w:"Multi-gigawatt MI-series GPU deal with OpenAI (~$90B)"},
+  NVDA:{n:"NVIDIA",x:"NASDAQ",r:"AM",w:"Dominant AI accelerator supplier; invested $30B in OpenAI in 2026"},
+  AMD:{n:"AMD",x:"NASDAQ",r:"AM",w:"Multi-gigawatt MI-series GPU supply deal with OpenAI"},
   AVGO:{n:"Broadcom",x:"NASDAQ",r:"AM",w:"Designs OpenAI's custom inference chip (first deploys H2 2026) and Google's TPUs"},
   MRVL:{n:"Marvell",x:"NASDAQ",r:"AM",w:"Custom AI silicon and optical interconnect for hyperscalers"},
   "2330.TW":{n:"TSMC",x:"TWSE",r:"AP",w:"Manufactures almost every leading AI chip"},
@@ -113,7 +113,7 @@ const M = {
     insight:"OpenAI spends more on compute than it earns, so your subscription is effectively subsidized by investors. Most of it ends up with cloud providers, and through them with chipmakers, memory makers and power companies.",
     root:{cos:[],owners:["MSFT","9984.T"],desc:"OpenAI is private and loss-making, so what it keeps is reinvested. Microsoft (~27% stake) and SoftBank are the listed ways to own a piece of it.",children:[
       {name:"Cloud compute & data centers",pct:42,cat:"cloud",cos:["MSFT","ORCL","CRWV","AMZN"],desc:"Azure, Oracle Stargate ($300B), CoreWeave (~$22B), AWS ($38B)",children:[
-        {name:"AI accelerators (GPUs, custom chips)",pct:45,cat:"chips",cos:["NVDA","AMD","AVGO"],desc:"NVIDIA 10 GW partnership, AMD MI-series, Broadcom custom chip",children:[
+        {name:"AI accelerators (GPUs, custom chips)",pct:45,cat:"chips",cos:["NVDA","AMD","AVGO"],desc:"NVIDIA GPUs (NVIDIA also invested $30B in OpenAI), AMD MI-series, Broadcom custom chip (first deployments H2 2026)",children:[
           {name:"Chip foundry & packaging",pct:35,cat:"fab",cos:["2330.TW"],desc:"TSMC makes the chips at 3nm/4nm and does CoWoS packaging",children:[
             {name:"Chipmaking equipment",pct:30,cat:"fab",cos:["ASML","8035.T","AMAT","LRCX"],desc:"EUV lithography, etch and deposition tools"}]},
           {name:"HBM memory",pct:25,cat:"memory",cos:["000660.KS","MU","005930.KS"],desc:"Stacked memory attached to each GPU"}]},
@@ -126,7 +126,7 @@ const M = {
     src:[["OpenAI compute commitments tracker","https://presenc.ai/research/openai-compute-commitments-tracker-2026"],["OpenAI taps AMD (CIO Dive)","https://www.ciodive.com/news/openai-amd-gpu-infrastructure-partnership-coreweave-oracle-nvidia/802163/"],["Stargate details","https://intuitionlabs.ai/articles/openai-stargate-datacenter-details"]]},
 
   netflix:{name:"Netflix",color:"#e50914",letter:"N",cat:"media",txcat:"Entertainment",
-    stats:[["~$45B","Annual revenue"],["300M+","Paid memberships"],["~$18B","Yearly content spend"]],
+    stats:[["$45.2B","Revenue (2025)"],["325M+","Paid memberships"],["~$18B","Yearly content spend"]],
     insight:"More than half of every subscription goes into licensing and producing shows, which makes studios and rights-holders the main beneficiaries after Netflix itself.",
     root:{cos:["NFLX"],desc:"Netflix keeps the operating margin",children:[
       {name:"Content licensing & production",pct:55,cat:"media",cos:["6758.T","WBD","CMCSA"],desc:"Studio licensing fees, originals and live sports rights"},
@@ -139,10 +139,10 @@ const M = {
     src:[["Netflix investor relations","https://ir.netflix.net"]]},
 
   spotify:{name:"Spotify",color:"#1db954",letter:"S",cat:"media",txcat:"Entertainment",
-    stats:[["~€17B","Annual revenue"],["~700M","Monthly active users"],["~2/3","Revenue paid as royalties"]],
-    insight:"About two-thirds of your premium fee goes to labels and publishers, so the major record labels are the purest listed way to benefit from streaming growth.",
+    stats:[["~€17.2B","Revenue (2025)"],["~777M","Monthly active users (Q2 2026)"],["~60%","Of revenue paid as royalties"]],
+    insight:"About 60% of your premium fee goes to labels and publishers, so the major record labels are the purest listed way to benefit from streaming growth.",
     root:{cos:["SPOT"],desc:"Spotify keeps the gross margin",children:[
-      {name:"Royalties: labels & publishers",pct:66,cat:"media",cos:["UMG.AS","6758.T","WMG"],desc:"Universal, Sony Music and Warner take most royalties"},
+      {name:"Royalties: labels & publishers",pct:60,cat:"media",cos:["UMG.AS","6758.T","WMG"],desc:"Spotify paid out over $11B in 2025; Universal, Sony Music and Warner take the largest shares"},
       {name:"Cloud infrastructure",pct:6,cat:"cloud",cos:["GOOGL"],desc:"Runs on Google Cloud",children:[
         {name:"Chips in Google data centers",pct:35,cat:"chips",cos:["AVGO","2330.TW"],desc:"TPU design and fabrication"}]},
       {name:"App stores & payments",pct:5,cat:"payments",cos:["AAPL","ADYEN.AS","V"],desc:"Billing fees"},
@@ -152,7 +152,7 @@ const M = {
     src:[["Spotify investors","https://investors.spotify.com"]]},
 
   amazon:{name:"Amazon",color:"#ff9900",letter:"a",cat:"retail",txcat:"Shopping",
-    stats:[["~$700B","Annual revenue"],["~$120B","AWS revenue run-rate"],["200M+","Prime members"]],
+    stats:[["$717B","Revenue (2025)"],["~$169B","AWS annual run-rate (Q2 2026)"],["~9%","Revenue from advertising (2024)"]],
     insight:"Most of an Amazon order goes to brands and manufacturers, but a growing share pays for logistics: warehouses, robots, freight and electric vans.",
     root:{cos:["AMZN"],desc:"Amazon's retail margin, ads and fees",children:[
       {name:"Merchandise & brands",pct:55,cat:"retail",cos:["PG","005930.KS"],desc:"First- and third-party sellers",children:[
@@ -168,7 +168,7 @@ const M = {
     src:[["Amazon investor relations","https://ir.aboutamazon.com"]]},
 
   uber:{name:"Uber",color:"#000000",letter:"U",cat:"mobility",txcat:"Transport",
-    stats:[["~$190B","Gross bookings / yr"],["~$50B","Annual revenue"],["~180M","Monthly active users"]],
+    stats:[["$193.5B","Gross bookings (2025)"],["~$50B","Annual revenue"],["~208M","Monthly active consumers (Q2 2026)"]],
     insight:"Roughly 70% of a ride goes to the driver, who spends much of it on the car, fuel or charging and insurance. That flows on to automakers and energy companies.",
     root:{cos:["UBER"],desc:"Uber's take rate",children:[
       {name:"Driver earnings",pct:70,cat:"labor",cos:[],desc:"Paid to drivers",children:[
@@ -181,7 +181,7 @@ const M = {
     src:[["Uber investor relations","https://investor.uber.com"]]},
 
   starbucks:{name:"Starbucks",color:"#00704a",letter:"★",cat:"food",txcat:"Food & drink",
-    stats:[["~$37B","Annual revenue"],["40k+","Stores worldwide"],["~3%","Of cost is coffee beans"]],
+    stats:[["$37.2B","Revenue (FY2025)"],["~41k","Stores worldwide"],["Small","Share of price that is coffee beans"]],
     insight:"A latte mostly pays for baristas and rent. Coffee beans are a surprisingly small share, and cups and milk cost more than the coffee itself.",
     root:{cos:["SBUX"],desc:"Starbucks keeps the store margin",children:[
       {name:"Store staff",pct:30,cat:"labor",cos:[],desc:"Baristas and managers"},
@@ -193,7 +193,7 @@ const M = {
     src:[["Starbucks investor relations","https://investor.starbucks.com"]]},
 
   figma:{name:"Figma",color:"#a259ff",letter:"F",cat:"software",txcat:"Software",
-    stats:[["~$1B+","Annual revenue run-rate"],["13M+","Monthly users"],["2025","Listed on NYSE"]],
+    stats:[["$1.06B","Revenue (FY2025)"],["13M+","Monthly users (S-1)"],["2025","Listed on NYSE"]],
     insight:"Figma's IPO filing revealed a large multi-year AWS commitment, so a meaningful slice of every seat pays for Amazon's cloud. It also spends a growing amount on AI features.",
     root:{cos:["FIG"],desc:"Figma keeps the software margin",children:[
       {name:"Cloud hosting",pct:14,cat:"cloud",cos:["AMZN"],desc:"Runs on AWS",children:[
@@ -217,7 +217,7 @@ const M = {
     src:[["Apple investor relations","https://investor.apple.com"]]},
 
   airbnb:{name:"Airbnb",color:"#ff5a5f",letter:"A",cat:"travel",txcat:"Travel",
-    stats:[["~$85B","Gross booking value / yr"],["~$12B","Annual revenue"],["8M+","Active listings"]],
+    stats:[["~$91B","Gross booking value (2025)"],["$12.2B","Revenue (2025)"],["8M+","Active listings"]],
     insight:"About 86% of a stay goes straight to the host. Airbnb's slice is small but it is almost all margin, because Airbnb owns no property.",
     root:{cos:["ABNB"],desc:"Airbnb service fees",children:[
       {name:"Host payout",pct:86,cat:"hosts",cos:[],desc:"Paid to individual hosts (no listed exposure)"},
@@ -228,7 +228,7 @@ const M = {
     src:[["Airbnb investor relations","https://investors.airbnb.com"]]},
 
   shell:{name:"Shell",color:"#fbce07",letter:"S",cat:"energy",txcat:"Fuel",
-    stats:[["~$285B","Shell annual revenue"],["~46k","Retail stations"],["~25–40%","Of pump price is tax"]],
+    stats:[["~$284B","Shell revenue (2024)"],["~42,700","Branded retail sites (2025)"],["~25–40%","Of pump price is tax (varies by country)"]],
     insight:"Crude oil and taxes make up most of a fill-up. The retailer's margin is thin, and upstream producers capture most of the value.",
     root:{cos:["SHEL.L"],desc:"Shell retail margin",children:[
       {name:"Crude oil & refining",pct:58,cat:"energy",cos:["SHEL.L","XOM","2222.SR"],desc:"Upstream production and refining"},
@@ -237,13 +237,6 @@ const M = {
       {name:"Payments",pct:2,cat:"payments",cos:["V","MA"],desc:"Card fees"}]},
     tokens:[],tokenNote:"No credible token exposure for fuel. Energy equities are the direct play.",
     src:[["Shell investors","https://www.shell.com/investors.html"]]},
-};
-
-/* ---------- Typical monthly amounts per brand (for the public calculator) ---------- */
-const PLANS = {
-  openai:[["Plus",20],["Pro",200]], netflix:[["With ads",7.99],["Standard",17.99],["Premium",24.99]], spotify:[["Individual",11.99],["Family",19.99]],
-  amazon:[["Prime",14.99],["Typical month",150]], uber:[["A few rides",90],["Commuter",300]], starbucks:[["Weekly latte",26],["Daily coffee",130]],
-  figma:[["Professional",20],["Organization",55]], apple:[["200GB",2.99],["2TB",9.99]], airbnb:[["Weekend trip",400]], shell:[["Monthly fuel",220]],
 };
 
 /* ---------- Brand domains for logos ---------- */
@@ -275,17 +268,24 @@ function logo(domain, label, color, size=""){
 // Google favicons first; if it's tiny or missing, try DuckDuckGo; else keep the letter tile
 function logoLoaded(img){ if(img.naturalWidth<=16) return logoFailed(img); img.previousElementSibling?.remove(); }
 function logoFailed(img){ if(!img.dataset.alt){ img.dataset.alt=1; img.src=`https://icons.duckduckgo.com/ip3/${img.dataset.d}.ico`; } else img.remove(); }
-const mLogo = (k,size) => logo(MDOM[k], M[k].name, M[k].color, size);
+const mLogo = (k,size="") => M[k].emoji ? `<span class="logo ${size}"><span class="emo">${M[k].emoji}</span></span>` : logo(MDOM[k], M[k].name, M[k].color, size);
 const cLogo = (tk,size) => logo(DOM[tk], CO[tk].n, "#71717a", size);
 
-function flow(key, amount){
+// Walk a purchase's supply chain; pid picks the product (defaults to the brand's first)
+// Share of an industry's money that reaches its listed leaders (the rest goes to private and smaller firms).
+// Concentrated industries (chips, cloud, card networks) are near 1; fragmented ones (hotels, restaurants, farms) are low.
+const CAPTURE = {hotels:.35,food:.3,agri:.4,retail:.6,leisure:.5,transit:.7,realestate:.3,luxury:.6,airlines:.75,cpg:.7,grocer:.85,apparel:.35,
+  insurance:.5,logistics:.6,media:.7,materials:.6,components:.9,mfg:.8,energy:.8,auto:.8,autoparts:.7,health:.7,travel:.9,utility:.8,power:.8,grid:.8,telecom:.9,ads:.9};
+const captureOf = (node,cat,isRoot) => isRoot ? 1 : (node.capture ?? CAPTURE[node.cat||cat] ?? 1);
+function flow(key, amount, pid){
   const out=[];
-  const walk=(node,usd,cat)=>{
+  const walk=(node,usd,cat,isRoot)=>{
     const kids=node.children||[]; const claimed=kids.reduce((s,k)=>s+k.pct,0);
-    out.push({node,usd,own:usd*(100-claimed)/100,cat:node.cat||cat});
-    kids.forEach(k=>walk(k,usd*k.pct/100,k.cat));
+    const own=usd*(100-claimed)/100;
+    out.push({node,usd,own,listed:(node.cos||[]).length?own*captureOf(node,cat,isRoot):0,cat:node.cat||cat});
+    kids.forEach(k=>walk(k,usd*k.pct/100,k.cat,false));
   };
-  walk(M[key].root,amount,M[key].cat); return out;
+  walk(view(key,pid).root,amount,M[key].cat,true); return out;
 }
 function nodeHTML(node, usd, amount, mm, name){
   const kids=node.children||[];
