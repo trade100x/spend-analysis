@@ -490,7 +490,7 @@ function waysToInvest(k){
   const investors = INVESTORS[k] || (m.private ? [] : []);
   const cos={}; flow(k,100).forEach(f=>{ const c=f.node.cos||[]; c.forEach(t=>cos[t]=(cos[t]||0)+f.listed/c.length); });
   const skip=new Set([...direct,...investors]);
-  const suppliers=Object.entries(cos).filter(([t])=>!skip.has(t)).sort((x,y)=>y[1]-x[1]).slice(0,5).map(([t])=>t);
+  const suppliers=Object.entries(cos).filter(([t])=>!skip.has(t)&&!isPre(t)).sort((x,y)=>y[1]-x[1]).slice(0,5).map(([t])=>t);
   const peers=inv.peers.filter(t=>CO[t]&&!skip.has(t)&&!suppliers.includes(t));
   return {direct, investors, suppliers, peers, etfs:inv.etfs.filter(t=>CO[t])};
 }
@@ -499,14 +499,22 @@ const PRIVATE_NOTE = "This company is private, so its financials aren't public. 
 /* ---------- Pre-IPO routes: tokenized pre-IPO shares and listed private-company funds ---------- */
 // Verified PreStocks tokens on Solana (Jupiter token list). Economic exposure via an SPV, not equity.
 const PRE_TOKENS = [
-  {sym:"OPENAI",co:"OpenAI",brand:"openai",mint:"PreweJYECqtQwBtpxHL171nL2K6umo692gTm7Q3rpgF"},
-  {sym:"ANTHROPIC",co:"Anthropic",brand:"claude",mint:"Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw"},
-  {sym:"ANDURIL",co:"Anduril",mint:"PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB"},
-  {sym:"NEURALINK",co:"Neuralink",mint:"PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S"},
-  {sym:"FIGUREAI",co:"Figure AI",mint:"PreZad18qfPtbxNpMtMuAuX2zVpvkEU8DnJx56faCWd"},
-  {sym:"POLYMARKET",co:"Polymarket",mint:"Pre8AREmFPtoJFT8mQSXQLh56cwJmM7CFDRuoGBZiUP"},
-  {sym:"KALSHI",co:"Kalshi",mint:"PreLWGkkeqG1s4HEfFZSy9moCrJ7btsHuUtfcCeoRua"},
+  {sym:"OPENAI",co:"OpenAI",brand:"openai",domain:"openai.com",mint:"PreweJYECqtQwBtpxHL171nL2K6umo692gTm7Q3rpgF"},
+  {sym:"ANTHROPIC",co:"Anthropic",brand:"claude",domain:"anthropic.com",mint:"Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw"},
+  {sym:"ANDURIL",co:"Anduril",domain:"anduril.com",mint:"PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB"},
+  {sym:"NEURALINK",co:"Neuralink",domain:"neuralink.com",mint:"PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S"},
+  {sym:"FIGUREAI",co:"Figure AI",domain:"figure.ai",mint:"PreZad18qfPtbxNpMtMuAuX2zVpvkEU8DnJx56faCWd"},
+  {sym:"POLYMARKET",co:"Polymarket",domain:"polymarket.com",mint:"Pre8AREmFPtoJFT8mQSXQLh56cwJmM7CFDRuoGBZiUP"},
+  {sym:"KALSHI",co:"Kalshi",domain:"kalshi.com",mint:"PreLWGkkeqG1s4HEfFZSy9moCrJ7btsHuUtfcCeoRua"},
 ];
+// Each token acts like a company in the analysis: the money a private brand keeps flows to its pre-IPO token
+const isPre = t => !!(CO[t]&&CO[t].pre);
+PRE_TOKENS.forEach(t=>{
+  const key="PRE:"+t.sym;
+  CO[key]={n:t.co+" pre-IPO token",x:"PreStocks · Solana",r:"AM",w:`Tokenized pre-IPO exposure to ${t.co} through an SPV. Not equity.`,pre:t};
+  DOM[key]=t.domain;
+  if(t.brand&&M[t.brand]) [M[t.brand].root,...(M[t.brand].products||[]).map(p=>p.root)].filter(Boolean).forEach(r=>{ r.cos=[...new Set([...(r.cos||[]),key])]; });
+});
 // Listed funds that hold the private company (from their published holdings, 2026)
 const PRE_FUNDS = {openai:["RVI","DXYZ"], claude:["RVI","DXYZ"], grok:["DXYZ"], revolut:["DXYZ"]};
 const IPO_NOTE = {openai:"OpenAI reportedly filed confidentially for a US IPO in June 2026.", claude:"Anthropic reportedly filed confidentially for a US IPO in June 2026."};

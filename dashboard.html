@@ -137,6 +137,12 @@ body.open{overflow:hidden}
 .agedit{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 12px}
 .agedit input{width:90px;height:32px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font:inherit;text-align:right}
 .agedit ul{margin:0;padding-left:18px;flex-basis:100%}
+.acard .cbr{opacity:1;font-weight:600;color:#fef08a}
+.agport{margin:0 0 12px}
+.agport .pt{font-size:12px;color:var(--muted);margin-bottom:6px}
+.hchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:3px 10px 3px 3px;font-size:12px;margin:0 6px 6px 0;cursor:pointer;animation:pop .35s ease}
+.hchip:hover{border-color:var(--text)}
+.hchip span{color:var(--muted);font-variant-numeric:tabular-nums}
 .agstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 12px}
 .agstats div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12px;color:var(--muted)}
 .agstats b{display:block;font-size:17px;color:var(--text);font-variant-numeric:tabular-nums}
@@ -222,9 +228,10 @@ body.open{overflow:hidden}
   <section id="agents">
     <div class="sh"><h2>Agentic cards <span class="tagdemo">Demo</span></h2>
       <div class="agbtns"><button class="pbtn" id="agRun">▶ Run demo</button><button class="pbtn ghost" id="agReset">Reset</button></div></div>
-    <p class="agsub">One virtual card per tool, each with its own rules. Charges are approved, declined or held for you automatically. Tap a card to change its limit.</p>
+    <p class="agsub">One virtual card per tool, each with its own rules. Charges are approved, declined or held for you automatically, and every approved charge pays <b>cashback in the company's stock</b>: shop on Amazon, get Amazon shares. Tap a card to change its limit or cashback.</p>
     <div class="agrid" id="agCards"></div>
     <div class="agstats" id="agStats"></div>
+    <div class="agport" id="agPort"></div>
     <div class="feed" id="agFeed"></div>
   </section>
 
@@ -459,13 +466,13 @@ renderAll();
 
 /* ---------- Agentic cards demo (simulated) ---------- */
 const AG0 = [
-  {k:"openai",name:"ChatGPT",last4:"2041",limit:25,lock:true,rules:["Locked to OpenAI","Monthly cap"]},
-  {k:"netflix",name:"Netflix",last4:"7730",limit:20,lock:true,priceGuard:17.99,rules:["Price-hike guard","Locked to Netflix"]},
-  {k:"spotify",name:"Spotify",last4:"5512",limit:12,lock:true,rules:["Locked to Spotify","Blocks look-alike merchants"]},
-  {k:"uber",name:"Uber",last4:"3309",limit:150,lock:true,perTxn:50,rules:["Per-ride cap $50","Monthly cap"]},
-  {k:"figma",name:"Figma",last4:"8124",limit:20,lock:true,idle:true,rules:["Auto-pause after 30 days unused"]},
-  {k:"amazon",name:"Amazon",last4:"6671",limit:250,lock:true,investBack:.05,rules:["Invests 5% back in the companies you buy from"]},
-  {k:"apple",name:"iCloud+",last4:"1190",limit:10,lock:true,rules:["Locked to Apple","Monthly cap"]},
+  {k:"openai",name:"ChatGPT",last4:"2041",limit:25,lock:true,cb:{t:"MSFT",rate:.03,why:"OpenAI is private, so cashback goes into Microsoft, its largest listed investor"},rules:["Locked to OpenAI","Monthly cap"]},
+  {k:"netflix",name:"Netflix",last4:"7730",limit:20,lock:true,priceGuard:17.99,cb:{t:"NFLX",rate:.03},rules:["Price-hike guard","Locked to Netflix"]},
+  {k:"spotify",name:"Spotify",last4:"5512",limit:12,lock:true,cb:{t:"SPOT",rate:.03},rules:["Locked to Spotify","Blocks look-alike merchants"]},
+  {k:"uber",name:"Uber",last4:"3309",limit:150,lock:true,perTxn:50,cb:{t:"UBER",rate:.02},rules:["Per-ride cap $50","Monthly cap"]},
+  {k:"figma",name:"Figma",last4:"8124",limit:20,lock:true,idle:true,cb:{t:"FIG",rate:.03},rules:["Auto-pause after 30 days unused"]},
+  {k:"amazon",name:"Amazon",last4:"6671",limit:250,lock:true,cb:{t:"AMZN",rate:.05},rules:["Monthly cap $250"]},
+  {k:"apple",name:"iCloud+",last4:"1190",limit:10,lock:true,cb:{t:"AAPL",rate:.03},rules:["Locked to Apple","Monthly cap"]},
   {k:"trial",name:"Free-trial shield",last4:"0001",limit:1,lock:false,trial:true,rules:["$1 limit: trials can't convert into charges"]},
 ];
 const AG_EVENTS = [
@@ -481,26 +488,38 @@ const AG_EVENTS = [
   {card:"amazon",merchant:"Amazon",label:"Amazon.com order",amt:129},
   {card:"apple",merchant:"Apple",label:"iCloud+ 2TB",amt:9.99},
 ];
-let AG=[], agStats={ok:0,no:0,inv:0}, agTimer=null, agSel=null;
+let AG=[], agStats={ok:0,no:0,inv:0}, agTimer=null, agSel=null, agHold={};
+let AG_PX={};   // latest close per ticker, for turning cashback dollars into fractional shares
+(async()=>{ const base=/github\.io$|^localhost$|^127\.|^$/.test(location.hostname)?"https://spend-analysis.madmarketagents.workers.dev":"";
+  for(const u of [base+"/api/prices","prices.json"]){ try{ const d=await (await fetch(u)).json(); Object.entries(d.s).forEach(([t,a])=>AG_PX[t]=a[a.length-1][1]); agRender(); return; }catch(e){} } })();
+const cbRule = c => c.cb && c.cbOn!==false ? `${Math.round(c.cb.rate*100)}% cashback in ${c.cb.t} stock` : "";
+const shares = (usd,t) => AG_PX[t] ? usd/AG_PX[t] : null;
 const agLogo = c => M[c.k] ? mLogo(c.k,"sm") : c.k==="trial" ? `<span class="logo sm"><span class="emo">🛡️</span></span>` : `<span class="logo sm">${logo(c.domain,c.name,"#52525b","sm").replace(/^<span class="logo sm">|<\/span>$/g,"")}</span>`;
 const agBg = c => { const col=(M[c.k]&&M[c.k].color)||c.color||"#27272a"; return `linear-gradient(135deg, ${col} 0%, #0b0b0d 130%)`; };
-function agReset(){ clearTimeout(agTimer); AG=AG0.map(c=>({...c,spent:0,status:c.idle?"paused":"active"})); agStats={ok:0,no:0,inv:0}; agSel=null; $("#agFeed").innerHTML=""; $("#agRun").disabled=false; agRender(); }
+function agReset(){ clearTimeout(agTimer); AG=AG0.map(c=>({...c,cb:c.cb?{...c.cb}:null,spent:0,status:c.idle?"paused":"active"})); agStats={ok:0,no:0,inv:0}; agHold={}; agSel=null; $("#agFeed").innerHTML=""; $("#agRun").disabled=false; agRender(); }
 function agRender(){
   $("#agCards").innerHTML=AG.map(c=>`<div class="acard ${c.isNew?"new":""} ${agSel===c.last4?"sel":""}" data-l4="${c.last4}" style="background:${agBg(c)}">
     <div class="top">${agLogo(c)}<span class="nm">${esc(c.name)}</span><span class="st ${c.status}">${c.status}</span></div>
-    <div><div class="rule">${esc(c.rules[0])}</div>
+    <div><div class="rule">${esc(c.rules[0])}</div>${cbRule(c)?`<div class="rule cbr">↻ ${esc(cbRule(c))}</div>`:""}
       <div class="bar"><i style="width:${Math.min(100,c.spent/c.limit*100)}%"></i></div>
       <div class="ft"><span>${fmt(c.spent)} / ${fmt(c.limit)}</span><span>•••• ${c.last4}</span></div></div></div>`).join("")
     + (agSel?(()=>{ const c=AG.find(x=>x.last4===agSel); return `</div><div class="agedit" id="agEdit"><b style="color:var(--text)">${esc(c.name)} card rules</b>
       <label>Monthly limit $<input id="agLim" inputmode="decimal" value="${c.limit}"></label>
       <button class="pbtn ghost" id="agToggle">${c.status==="active"?"Pause card":"Resume card"}</button>
-      <ul>${c.rules.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>`; })():"");
+      ${c.cb?`<label><input type="checkbox" id="agCb" ${c.cbOn!==false?"checked":""} style="width:auto;height:auto"> Cashback as ${esc(c.cb.t)} stock</label>
+      <label>rate <input id="agCbRate" inputmode="decimal" value="${(c.cb.rate*100).toFixed(0)}" style="width:52px">%</label>`:""}
+      <ul>${[...c.rules,...(cbRule(c)?[cbRule(c)+(c.cb.why?` (${c.cb.why})`:"")]:[])].map(r=>`<li>${esc(r)}</li>`).join("")}</ul>`; })():"");
   // the edit panel sits right after the card row
   const ed=$("#agEdit"); if(ed){ $("#agCards").after(ed); }
   document.querySelectorAll("#agCards .acard").forEach(el=>el.onclick=()=>{ agSel = agSel===el.dataset.l4?null:el.dataset.l4; document.querySelectorAll(".agedit").forEach(x=>x.remove()); agRender(); });
   if($("#agLim")) $("#agLim").oninput=e=>{ const c=AG.find(x=>x.last4===agSel); c.limit=Math.max(0,parseFloat(e.target.value)||0); agRenderCardsOnly(); };
+  if($("#agCb")) $("#agCb").onchange=e=>{ const c=AG.find(x=>x.last4===agSel); c.cbOn=e.target.checked; agRenderCardsOnly(); };
+  if($("#agCbRate")) $("#agCbRate").oninput=e=>{ const c=AG.find(x=>x.last4===agSel); c.cb.rate=Math.min(.2,Math.max(0,(parseFloat(e.target.value)||0)/100)); document.querySelectorAll(".acard").forEach(()=>{}); };
   if($("#agToggle")) $("#agToggle").onclick=()=>{ const c=AG.find(x=>x.last4===agSel); c.status=c.status==="active"?"paused":"active"; document.querySelectorAll(".agedit").forEach(x=>x.remove()); agRender(); };
-  $("#agStats").innerHTML=`<div>Approved<b>${fmt(agStats.ok)}</b></div><div>Blocked or held<b>${fmt(agStats.no)}</b></div><div>Invested back<b>${fmt(agStats.inv)}</b></div>`;
+  $("#agStats").innerHTML=`<div>Approved<b>${fmt(agStats.ok)}</b></div><div>Blocked or held<b>${fmt(agStats.no)}</b></div><div>Stock cashback<b>${fmt(agStats.inv)}</b></div>`;
+  const hs=Object.entries(agHold);
+  $("#agPort").innerHTML = hs.length ? `<div class="pt">Your stock cashback portfolio</div>${hs.map(([t,h])=>`<button class="hchip" data-tk="${t}">${cLogo(t,"sm")}<b>${esc(t)}</b><span>${h.sh!=null?h.sh.toFixed(4)+" sh":""} · ${fmt(h.usd)}</span></button>`).join("")}<p class="src" style="margin:4px 0 0">Fractional shares at the latest close. Tap one to buy more.</p>` : "";
+  document.querySelectorAll("#agPort .hchip").forEach(b=>b.onclick=()=>openBuy(b.dataset.tk));
 }
 function agRenderCardsOnly(){ const sel=agSel; document.querySelectorAll(".agedit").forEach(x=>x.remove()); agRender(); agSel=sel; }
 function agDecide(c,e){
@@ -510,14 +529,17 @@ function agDecide(c,e){
   if(c.perTxn && e.amt>c.perTxn) return ["no",`Over the ${fmt(c.perTxn)} per-ride cap (surge pricing). Try again when surge drops.`];
   if(c.priceGuard && e.amt>c.priceGuard+0.01) return ["hold",`Price went up from ${fmt(c.priceGuard)} to ${fmt(e.amt)}. Holding the charge until you approve.`];
   if(c.spent+e.amt>c.limit) return ["no",`Would take this card to ${fmt(c.spent+e.amt)}, over its ${fmt(c.limit)} monthly limit.`];
-  return ["ok", c.investBack?`Within limit. ${fmt(e.amt*c.investBack)} invested back in ${esc(M[c.k]?.name||c.name)} automatically.`:`Within limit (${fmt(c.limit-c.spent-e.amt)} left this month).`];
+  if(cbRule(c)){ const usd=e.amt*c.cb.rate, sh=shares(usd,c.cb.t);
+    return ["ok", `Within limit. You earned <b>${fmt(usd)} cashback as ${esc(c.cb.t)} stock</b>${sh!=null?` (${sh.toFixed(4)} shares)`:""}${c.cb.why?`. ${esc(c.cb.why)}`:""}.`]; }
+  return ["ok", `Within limit (${fmt(c.limit-c.spent-e.amt)} left this month).`];
 }
 function agApply(c,e,d){
   const el=document.querySelector(`.acard[data-l4="${c.last4}"]`);
-  if(d==="ok"){ c.spent+=e.amt; agStats.ok+=e.amt; if(c.investBack) agStats.inv+=e.amt*c.investBack; } else agStats.no+=e.amt;
+  if(d==="ok"){ c.spent+=e.amt; agStats.ok+=e.amt; creditCb(c,e.amt); } else agStats.no+=e.amt;
   agRenderCardsOnly();
   const el2=document.querySelector(`.acard[data-l4="${c.last4}"]`); if(el2){ el2.classList.add("flash-"+d); setTimeout(()=>el2.classList.remove("flash-"+d),900); }
 }
+function creditCb(c,amt){ if(!cbRule(c)) return; const usd=amt*c.cb.rate, t=c.cb.t, h=agHold[t]||(agHold[t]={usd:0,sh:0}); h.usd+=usd; const sh=shares(usd,t); h.sh = sh!=null ? h.sh+sh : null; agStats.inv+=usd; }
 function agPush(e){
   const c=AG.find(x=>x.k===e.card)||AG.find(x=>x.last4===e.card); if(!c) return;
   const [d,why]=agDecide(c,e), id="ev"+Math.random().toString(36).slice(2);
@@ -528,7 +550,7 @@ function agPush(e){
   agApply(c,e,d==="hold"?"hold":d); if(d==="hold") agStats.no-=0;
   const row=$("#"+id);
   row.querySelectorAll(".acts button").forEach(b=>b.onclick=()=>{ const ok=b.dataset.a==="ok";
-    if(ok){ c.priceGuard=e.amt; c.spent+=e.amt; agStats.ok+=e.amt; agStats.no-=e.amt; }
+    if(ok){ c.priceGuard=e.amt; c.spent+=e.amt; agStats.ok+=e.amt; agStats.no-=e.amt; creditCb(c,e.amt); }
     row.querySelector(".badge").className="badge "+(ok?"ok":"no"); row.querySelector(".badge").textContent=ok?"APPROVED BY YOU":"DECLINED BY YOU";
     row.querySelector(".acts").remove(); agRenderCardsOnly(); });
 }
@@ -572,8 +594,8 @@ const CHAT_SCRIPT = [
 ];
 let mcpTab="cli", mcpT=null;
 function mcpAddCard(kind){
-  if(kind==="card" && !AG.some(c=>c.last4==="7342")){ AG.push({k:"figma",name:"Claude agent · Figma",last4:"7342",limit:250,lock:true,spent:0,status:"active",isNew:true,rules:["Created by Claude via MCP","Single use, locked to figma.com"]}); agRenderCardsOnly(); }
-  if(kind==="pay"){ const c=AG.find(x=>x.last4==="7342"); if(c){ c.spent=240; agStats.ok+=240; agRenderCardsOnly(); } }
+  if(kind==="card" && !AG.some(c=>c.last4==="7342")){ AG.push({k:"figma",name:"Claude agent · Figma",last4:"7342",limit:250,lock:true,spent:0,status:"active",isNew:true,cb:{t:"FIG",rate:.03},rules:["Created by Claude via MCP","Single use, locked to figma.com"]}); agRenderCardsOnly(); }
+  if(kind==="pay"){ const c=AG.find(x=>x.last4==="7342"); if(c){ c.spent=240; agStats.ok+=240; creditCb(c,240); agRenderCardsOnly(); } }
   if(kind==="freeze"){ const c=AG.find(x=>x.last4==="7342"); if(c){ c.status="frozen"; agRenderCardsOnly(); } }
   if(kind==="card2" && !AG.some(c=>c.last4==="5518")){ AG.push({k:"x_emirates",domain:"emirates.com",color:"#b91c1c",name:"Claude agent · Emirates",last4:"5518",limit:600,lock:true,spent:0,status:"active",isNew:true,rules:["Created by Claude via MCP","Single use, locked to emirates.com"]}); agRenderCardsOnly(); }
   if(kind==="pay2"){ const c=AG.find(x=>x.last4==="5518"); if(c){ c.spent=482; c.status="frozen"; agStats.ok+=482; agRenderCardsOnly(); } }

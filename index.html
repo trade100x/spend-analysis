@@ -376,12 +376,12 @@ function analyse(){
 function showResult(scroll){
   const R=analyse(); if(!R.ls.length) return;
   writeHash();
-  const all=Object.keys(R.cos), listed=Object.values(R.cos).reduce((s,c)=>s+c.usd,0), nReg=new Set(all.map(k=>CO[k].r)).size;
+  const all=Object.keys(R.cos).filter(k=>!isPre(k)), pres=Object.keys(R.cos).filter(isPre), listed=all.reduce((s,k)=>s+R.cos[k].usd,0), nReg=new Set(all.map(k=>CO[k].r)).size;
   const rows=Object.entries(R.cats).sort((a,b)=>b[1]-a[1]);
   const segs=[...rows.slice(0,5).map(([k,v])=>({l:CAT[k].l,c:CAT[k].c,v})),{l:"Other",c:"var(--line)",v:rows.slice(5).reduce((s,r)=>s+r[1],0)}].filter(s=>s.v>0.001);
   const spend=[R.mo?`${fmt(R.mo)} a month`:"",R.once?`${fmt(R.once)} in one-off purchases`:""].filter(Boolean).join(" and ");
   $("#result").innerHTML=`
-    <p class="big">Your ${spend} <span class="soft">(${fmt0(R.year)} a year)</span> funds ${all.length} listed companies in ${nReg} region${nReg>1?"s":""}.</p>
+    <p class="big">Your ${spend} <span class="soft">(${fmt0(R.year)} a year)</span> funds ${all.length} listed companies in ${nReg} region${nReg>1?"s":""}${pres.length?` and ${pres.length===1?"a private company":pres.length+" private companies"} you can back through pre-IPO tokens`:""}.</p>
     <p class="sub">About ${Math.round(listed/R.year*100)}% of it ends up with publicly traded companies. The rest goes to wages, taxes, governments and private or smaller firms.</p>
     <div class="stack">${segs.map(s=>`<span style="width:${s.v/R.year*100}%;background:${s.c}"></span>`).join("")}</div>
     <div class="legend">${segs.map(s=>`<span><i style="background:${s.c}"></i>${esc(s.l)} ${Math.round(s.v/R.year*100)}%</span>`).join("")}</div>
@@ -430,10 +430,6 @@ function renderSummary(R){
           ${waysHTML(l.k)}
           ${v.src.length?`<p class="src" style="margin-top:10px">Sources: ${v.src.map(([t,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`).join(" · ")}</p>`:""}</div></div>`;}).join("")}
 
-    <h2>Pre-IPO tokens on Solana <small>live · very high risk</small></h2>
-    <p class="sub" style="margin-bottom:10px">Tokenized exposure to private companies, traded 24/7 on Jupiter. Prices are live.</p>
-    <div data-tokwrap>${PRE_TOKENS.map(tokenCard).join("")}</div>${tokenWarn()}
-
     <h2>Tokens linked to your spending <small>very high risk</small></h2>
     ${R.tokens.size?[...R.tokens.values()].map(([s,n,w])=>`<span class="tok" title="${esc(w)}"><b>${s}</b><span>${esc(n)}</span></span>`).join(""):`<p class="sub">No credible crypto proxies for these purchases. Equities are the direct play.</p>`}
 
@@ -441,16 +437,16 @@ function renderSummary(R){
   let showAll=false;
   const drawTop=()=>{ const list=showAll?top:top.slice(0,10);
     $("#topCos").innerHTML=(list.length?list.map(([tk,c])=>`<div class="row">${cLogo(tk)}
-      <div class="main"><div class="t">${esc(CO[tk].n)}<small>${esc(tk)} · ${esc(CO[tk].x)}</small></div><div class="s">${esc(CO[tk].w)}</div></div>
-      <div class="r num">${fmt(c.usd)}<small>via ${esc([...c.via][0])}</small></div><button class="buy" data-tk="${esc(tk)}">Buy</button></div>`).join("")
+      <div class="main"><div class="t">${esc(CO[tk].n)}${isPre(tk)?'<span class="est">pre-IPO</span>':""}<small>${isPre(tk)?esc(CO[tk].pre.sym):esc(tk)} · ${esc(CO[tk].x)}</small></div><div class="s">${esc(CO[tk].w)}</div></div>
+      <div class="r num">${fmt(c.usd)}<small>via ${esc([...c.via][0])}</small></div><button class="buy" data-tk="${esc(tk)}">${isPre(tk)?"Trade":"Buy"}</button></div>`).join("")
       :`<p class="sub">None of these purchases reach companies listed in ${REG[market]}.</p>`)
       +(top.length>10?`<button class="btn" id="allCos" style="margin-top:8px">${showAll?"Show top 10":"Show all "+top.length+" companies"}</button>`:"");
     $("#allCos")&&($("#allCos").onclick=()=>{showAll=!showAll;drawTop();});
     $("#topCos").querySelectorAll(".buy").forEach(b=>b.onclick=()=>openBuy(b.dataset.tk)); };
   drawTop();
   const drawBasket=()=>{ const amt=parseFloat($("#bamt").value)||0, t8=top.slice(0,8), tot=t8.reduce((s,[,c])=>s+c.usd,0);
-    $("#basket").innerHTML=t8.map(([tk,c])=>`<div class="row">${cLogo(tk,"sm")}<div class="main"><div class="t" style="font-size:14px">${esc(CO[tk].n)}<small>${esc(tk)}</small></div></div>
-      <div class="r num">${fmt(amt*c.usd/tot)}<small>${Math.round(c.usd/tot*100)}%</small></div><button class="buy" data-tk="${esc(tk)}">Buy</button></div>`).join("")
+    $("#basket").innerHTML=t8.map(([tk,c])=>`<div class="row">${cLogo(tk,"sm")}<div class="main"><div class="t" style="font-size:14px">${esc(CO[tk].n)}${isPre(tk)?'<span class="est">pre-IPO</span>':""}<small>${isPre(tk)?esc(CO[tk].pre.sym):esc(tk)}</small></div></div>
+      <div class="r num">${fmt(amt*c.usd/tot)}<small>${Math.round(c.usd/tot*100)}%</small></div><button class="buy" data-tk="${esc(tk)}">${isPre(tk)?"Trade":"Buy"}</button></div>`).join("")
       +`<p class="src">Weighted by how much of your spending reaches each company. Many brokers offer fractional shares, so small amounts work. Not a recommendation.</p>`;
     $("#basket").querySelectorAll(".buy").forEach(b=>b.onclick=()=>openBuy(b.dataset.tk)); };
   drawBasket(); $("#bamt").oninput=drawBasket;
@@ -488,7 +484,6 @@ function tokenCard(t){
     <a href="https://jup.ag/swap/USDC-${t.mint}" target="_blank" rel="noopener">Trade ↗</a></div>`;
 }
 const tokenWarn = () => `<p class="warn">Tokens issued by PreStocks track shares held in a special-purpose vehicle. They are <b>not equity</b> and give no ownership or voting rights. In May 2026 OpenAI and Anthropic said such transfers break their share rules, and the tokens fell about 40%. Liquidity is thin, implied valuations can sit far above funding rounds, and they aren't offered to US persons.</p>`;
-function refreshTokenCards(){ if(!$("#result").classList.contains("show")) return; document.querySelectorAll("[data-tokwrap]").forEach(el=>el.innerHTML=PRE_TOKENS.map(tokenCard).join("")); }
 
 /* ---------- Returns: "if you'd invested what you spent" ---------- */
 let PRICES=null;
@@ -535,7 +530,7 @@ function drawReturns(R){
     ${S.lines.map(x=>x.skip?`<div class="row">${mLogo(x.l.k,"sm")}<div class="main"><div class="t" style="font-size:14px">${esc(M[x.l.k].name)} · ${esc(product(x.l.k,x.l.p).n)}</div><div class="s">No listed companies with price history</div></div></div>`
       :`<div class="row">${mLogo(x.l.k,"sm")}<div class="main"><div class="t" style="font-size:14px">${esc(M[x.l.k].name)} · ${esc(product(x.l.k,x.l.p).n)}</div><div class="s">${isOnce(x.l)?`${fmt(x.l.amt)} once, ${S.years}y ago`:`${fmt(x.l.amt)}/mo × ${x.months} months`} = ${fmt0(x.inv)} invested</div></div><div class="r num">${fmt0(x.val)}<small>${pct(x.val,x.inv)}</small></div></div>`).join("")}
     <details class="all"><summary>Company by company (${S.cos.length})</summary>${S.cos.slice(0,40).map(c=>`<div class="irow"><span>${esc(CO[c.t].n)} <span style="color:var(--faint)">${esc(c.t)}</span></span><span class="num">${fmt0(c.inv)} → ${fmt0(c.val)} · share price ${isFinite(c.chg)?(c.chg>=0?"+":"")+(c.chg*100).toFixed(0)+"%":"n/a"}</span></div>`).join("")}</details>
-    ${R.ls.some(l=>M[l.k].private)?`<p class="src">Private companies themselves aren't included: their pre-IPO tokens only launched in September 2025 and have no reliable price history. Only the listed companies in their supply chains are counted.</p>`:""}
+    ${R.ls.some(l=>M[l.k].private)?`<p class="src">Pre-IPO tokens (like OpenAI's and Anthropic's) aren't included in these returns: they only launched in September 2025 and have no reliable price history. Only the listed companies in the supply chains are counted.</p>`:""}
     <p class="src">Monthly closing prices from Yahoo Finance${PRICES.asof?` (as of ${esc(PRICES.asof)})`:""}. Each month's money is split across the listed companies your purchase funds, weighted by how much reaches each. Price change only: dividends, currency moves, fees and taxes are ignored. Companies without price history are left out. Past performance doesn't predict future returns.</p>`;
 }
 

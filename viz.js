@@ -163,6 +163,7 @@ function brokerLinks(tk){
 function openBuy(tk){
   let el=document.getElementById("buy-sheet");
   if(!el){ el=document.createElement("div"); el.id="buy-sheet"; document.body.appendChild(el); }
+  if(CO[tk].pre) return openPre(el,tk);
   const c=CO[tk], {us,out}=brokerLinks(tk);
   el.innerHTML=`<div class="bs-scrim"></div><div class="bs-card" role="dialog" aria-label="Invest in ${esc(c.n)}">
     <button class="bs-x" aria-label="Close">×</button>
@@ -175,6 +176,26 @@ function openBuy(tk){
   el.classList.add("on");
   const close=()=>el.classList.remove("on");
   el.querySelector(".bs-scrim").onclick=close; el.querySelector(".bs-x").onclick=close;
+}
+async function openPre(el,tk){
+  const c=CO[tk], t=c.pre;
+  const draw=()=>{ const d=typeof PRE_PX!=="undefined"&&PRE_PX&&PRE_PX[t.mint], ch=d?.priceChange24h;
+    el.innerHTML=`<div class="bs-scrim"></div><div class="bs-card" role="dialog" aria-label="${esc(c.n)}">
+    <button class="bs-x" aria-label="Close">×</button>
+    <div class="bs-h">${cLogo(tk,"lg")}<div><b>${esc(t.co)}</b><small>${esc(t.sym)} · pre-IPO token · Solana</small></div></div>
+    <p class="bs-w">${esc(t.co)} is private. This token from PreStocks tracks ${esc(t.co)} shares held in a special-purpose vehicle.</p>
+    <div class="bs-list">
+      <div class="bs-b" style="cursor:default"><span><b>${d?fmt(d.usdPrice):"Loading…"}</b><small>${isFinite(ch)?`${ch>=0?"+":""}${ch.toFixed(1)}% in 24h · `:""}${d?.stockData?.mcap?"implies a "+(d.stockData.mcap>=1e12?"$"+(d.stockData.mcap/1e12).toFixed(2)+"T":"$"+(d.stockData.mcap/1e9).toFixed(0)+"B")+" valuation":"live price from Jupiter"}</small></span></div>
+      <a class="bs-b" href="https://jup.ag/swap/USDC-${t.mint}" target="_blank" rel="noopener"><span><b>Trade on Jupiter</b><small>Solana · 24/7</small></span><span>↗</span></a>
+      ${(typeof PRE_FUNDS!=="undefined"&&PRE_FUNDS[t.brand]||[]).map(f=>`<button class="bs-b" data-fund="${f}" style="background:#fff;text-align:left;font:inherit;cursor:pointer"><span><b>Or buy ${esc(CO[f].n)} (${f})</b><small>NYSE-listed fund that holds ${esc(t.co)}</small></span><span>→</span></button>`).join("")}
+    </div>
+    <p class="bs-d" style="color:#92400e">Not equity: no ownership or voting rights. In May 2026 OpenAI and Anthropic said transfers like this break their share rules, and the tokens fell about 40%. Thin liquidity; not offered to US persons. Not investment advice.</p></div>`;
+    el.classList.add("on");
+    const close=()=>el.classList.remove("on");
+    el.querySelector(".bs-scrim").onclick=close; el.querySelector(".bs-x").onclick=close;
+    el.querySelectorAll("[data-fund]").forEach(b=>b.onclick=()=>openBuy(b.dataset.fund)); };
+  draw();
+  if(typeof loadPreTokens==="function"){ await loadPreTokens(); if(el.classList.contains("on")) draw(); }
 }
 addEventListener("keydown",e=>{ if(e.key==="Escape") document.getElementById("buy-sheet")?.classList.remove("on"); });
 
