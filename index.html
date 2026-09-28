@@ -128,6 +128,15 @@ h2 small{font-weight:400;color:var(--faint);font-size:12px}
 .wchip:hover{border-color:var(--text)}
 .wchip i{font-style:normal;color:var(--faint)}
 .ways .pre{font-size:12px;color:var(--faint);margin:6px 0 4px}
+.tokc{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:0 0 6px}
+.tokc .tm{flex:1;min-width:0;font-size:13px}
+.tokc .tm b{font-weight:600}
+.tokc .tm small{display:block;color:var(--faint);font-size:11.5px}
+.tokc .tp{text-align:right;font-size:13px;font-variant-numeric:tabular-nums}
+.tokc .tp small{display:block;font-size:11px}
+.tokc a{font-size:12px;border:1px solid var(--line);border-radius:99px;padding:3px 10px;text-decoration:none;white-space:nowrap}
+.tokc a:hover{border-color:var(--text)}
+.warn{font-size:12px;color:#92400e;background:#fffbeb;border-radius:8px;padding:8px 10px;margin:4px 0 6px}
 .periods{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:2px}
 .periods button{border:0;background:none;border-radius:99px;padding:3px 10px;font-size:12px;cursor:pointer;color:var(--muted)}
 .periods button.on{background:var(--text);color:#fff}
@@ -414,6 +423,10 @@ function renderSummary(R){
           ${waysHTML(l.k)}
           ${v.src.length?`<p class="src" style="margin-top:10px">Sources: ${v.src.map(([t,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`).join(" · ")}</p>`:""}</div></div>`;}).join("")}
 
+    <h2>Pre-IPO tokens on Solana <small>live · very high risk</small></h2>
+    <p class="sub" style="margin-bottom:10px">Tokenized exposure to private companies, traded 24/7 on Jupiter. Prices are live.</p>
+    <div data-tokwrap>${PRE_TOKENS.map(tokenCard).join("")}</div>${tokenWarn()}
+
     <h2>Tokens linked to your spending <small>very high risk</small></h2>
     ${R.tokens.size?[...R.tokens.values()].map(([s,n,w])=>`<span class="tok" title="${esc(w)}"><b>${s}</b><span>${esc(n)}</span></span>`).join(""):`<p class="sub">No credible crypto proxies for these purchases. Equities are the direct play.</p>`}
 
@@ -438,6 +451,7 @@ function renderSummary(R){
   $("#modeBody").querySelectorAll(".wchip").forEach(b=>b.onclick=()=>openBuy(b.dataset.tk));
   $("#modeBody").querySelectorAll(".periods button").forEach(b=>b.onclick=()=>{ period=+b.dataset.y; $("#modeBody").querySelectorAll(".periods button").forEach(x=>x.classList.toggle("on",x===b)); drawReturns(R); });
   loadPrices().then(()=>drawReturns(R));
+  if(!PRE_PX) loadPreTokens().then(()=>{ if(mode==="summary") renderSummary(R); });
   $("#modeBody").querySelectorAll(".nh").forEach(b=>b.onclick=()=>b.parentElement.classList.toggle("open"));
   $("#share").onclick=async e=>{ try{ await navigator.clipboard.writeText(location.href); e.target.textContent="Link copied"; }catch(_){ e.target.textContent="Copy the URL from the address bar"; } };
   $("#reset").onclick=()=>{ lines=[]; addLine("openai"); history.replaceState(null,"",location.pathname); $("#result").classList.remove("show"); renderTiles(); scrollTo({top:0,behavior:"smooth"}); };
@@ -446,11 +460,28 @@ function renderSummary(R){
 /* ---------- Ways to invest (works for private companies too) ---------- */
 function waysHTML(k){
   const w=waysToInvest(k), m=M[k], chip=t=>`<button class="wchip" data-tk="${esc(t)}">${cLogo(t,"sm")}<b>${esc(CO[t].n)}</b><i>${esc(t)}</i></button>`;
-  const groups=[[`Buy ${m.name} directly`,w.direct],[`Listed investors in ${m.name}`,w.investors],["Suppliers & enablers it pays",w.suppliers],["Listed competitors",w.peers],["Industry ETFs",w.etfs]].filter(g=>g[1].length);
+  const funds=(PRE_FUNDS[k]||[]).filter(t=>CO[t]), toks=PRE_TOKENS.filter(t=>t.brand===k);
+  const groups=[[`Buy ${m.name} directly`,w.direct],[`Listed investors in ${m.name}`,w.investors],[`Listed funds that hold ${m.name}`,funds],["Suppliers & enablers it pays",w.suppliers],["Listed competitors",w.peers],["Industry ETFs",w.etfs]].filter(g=>g[1].length);
   return `<div class="ways"><h5 style="margin-top:6px;color:var(--text);font-weight:600">How to invest in ${esc(m.name)}${m.private?" (it's private)":""}</h5>
+    ${IPO_NOTE[k]?`<p class="pre" style="color:var(--muted)">${esc(IPO_NOTE[k])}</p>`:""}
     ${groups.map(([t,l])=>`<h5>${esc(t)}</h5>${l.map(chip).join("")}`).join("")}
+    ${toks.length?`<h5>Pre-IPO tokens (Solana)</h5>${toks.map(tokenCard).join("")}${tokenWarn()}`:""}
+    ${ROBINHOOD_TOKENS[k]?`<p class="pre">${esc(ROBINHOOD_TOKENS[k])}</p>`:""}
     ${m.private?`<p class="pre">Pre-IPO: shares of private companies sometimes trade on secondary marketplaces (for example EquityZen or Forge). These are usually limited to accredited investors, illiquid and high risk.</p>`:""}</div>`;
 }
+
+/* ---------- Pre-IPO tokens (PreStocks on Solana, live prices from Jupiter) ---------- */
+const bigUsd = n => n>=1e12?"$"+(n/1e12).toFixed(2)+"T":n>=1e9?"$"+(n/1e9).toFixed(0)+"B":fmt0(n);
+function tokenCard(t){
+  const d=PRE_PX&&PRE_PX[t.mint], ch=d?.priceChange24h;
+  return `<div class="tokc"><span class="logo sm"><img src="https://www.google.com/s2/favicons?domain=prestocks.com&sz=64" alt="" style="width:70%;height:70%"></span>
+    <div class="tm"><b>${esc(t.sym)}</b> · ${esc(t.co)} PreStocks
+      <small>${d?.stockData?.mcap?`Implied valuation ${bigUsd(d.stockData.mcap)} (PreStocks)`:"Price loading…"}${d?.liquidity?` · liquidity ${bigUsd(d.liquidity)}`:""}</small></div>
+    <div class="tp">${d?fmt(d.usdPrice):"…"}${isFinite(ch)?`<small class="${ch>=0?"up":"dn"}">${ch>=0?"+":""}${ch.toFixed(1)}% 24h</small>`:""}</div>
+    <a href="https://jup.ag/swap/USDC-${t.mint}" target="_blank" rel="noopener">Trade ↗</a></div>`;
+}
+const tokenWarn = () => `<p class="warn">Tokens issued by PreStocks track shares held in a special-purpose vehicle. They are <b>not equity</b> and give no ownership or voting rights. In May 2026 OpenAI and Anthropic said such transfers break their share rules, and the tokens fell about 40%. Liquidity is thin, implied valuations can sit far above funding rounds, and they aren't offered to US persons.</p>`;
+function refreshTokenCards(){ if(!$("#result").classList.contains("show")) return; document.querySelectorAll("[data-tokwrap]").forEach(el=>el.innerHTML=PRE_TOKENS.map(tokenCard).join("")); }
 
 /* ---------- Returns: "if you'd invested what you spent" ---------- */
 let PRICES=null;
@@ -497,6 +528,7 @@ function drawReturns(R){
     ${S.lines.map(x=>x.skip?`<div class="row">${mLogo(x.l.k,"sm")}<div class="main"><div class="t" style="font-size:14px">${esc(M[x.l.k].name)} · ${esc(product(x.l.k,x.l.p).n)}</div><div class="s">No listed companies with price history</div></div></div>`
       :`<div class="row">${mLogo(x.l.k,"sm")}<div class="main"><div class="t" style="font-size:14px">${esc(M[x.l.k].name)} · ${esc(product(x.l.k,x.l.p).n)}</div><div class="s">${isOnce(x.l)?`${fmt(x.l.amt)} once, ${S.years}y ago`:`${fmt(x.l.amt)}/mo × ${x.months} months`} = ${fmt0(x.inv)} invested</div></div><div class="r num">${fmt0(x.val)}<small>${pct(x.val,x.inv)}</small></div></div>`).join("")}
     <details class="all"><summary>Company by company (${S.cos.length})</summary>${S.cos.slice(0,40).map(c=>`<div class="irow"><span>${esc(CO[c.t].n)} <span style="color:var(--faint)">${esc(c.t)}</span></span><span class="num">${fmt0(c.inv)} → ${fmt0(c.val)} · share price ${isFinite(c.chg)?(c.chg>=0?"+":"")+(c.chg*100).toFixed(0)+"%":"n/a"}</span></div>`).join("")}</details>
+    ${R.ls.some(l=>M[l.k].private)?`<p class="src">Private companies themselves aren't included: their pre-IPO tokens only launched in September 2025 and have no reliable price history. Only the listed companies in their supply chains are counted.</p>`:""}
     <p class="src">Monthly closing prices from Yahoo Finance${PRICES.asof?` (as of ${esc(PRICES.asof)})`:""}. Each month's money is split across the listed companies your purchase funds, weighted by how much reaches each. Price change only: dividends, currency moves, fees and taxes are ignored. Companies without price history are left out. Past performance doesn't predict future returns.</p>`;
 }
 

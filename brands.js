@@ -65,6 +65,9 @@ Object.assign(CO, {
   "1024.HK":{n:"Kuaishou",x:"HKEX",r:"AP",w:"Short-video platform; makes the Kling AI video model"},
   MTCH:{n:"Match Group",x:"NASDAQ",r:"AM",w:"Tinder, Hinge, OkCupid"}, BMBL:{n:"Bumble",x:"NASDAQ",r:"AM",w:"Bumble dating app"},
   PTON:{n:"Peloton",x:"NASDAQ",r:"AM",w:"Connected fitness"},
+  SPCX:{n:"SpaceX",x:"NASDAQ",r:"AM",w:"Rockets and Starlink; listed on Nasdaq in June 2026 (largest IPO ever)"},
+  RVI:{n:"Robinhood Ventures Fund I",x:"NYSE",r:"AM",w:"Listed fund (2026) holding OpenAI, SpaceX, Anthropic, Stripe, Databricks and other private companies"},
+  DXYZ:{n:"Destiny Tech100",x:"NYSE",r:"AM",w:"Listed fund holding ~36 private tech companies incl. OpenAI, Anthropic, xAI, Revolut; often trades far above its asset value"},
 });
 const ETF = {
   SMH:["VanEck Semiconductor ETF","Semiconductor makers: NVIDIA, TSMC, ASML…","vaneck.com"], AIQ:["Global X AI & Technology ETF","Global AI and big-data companies","globalxetfs.com"],
@@ -85,7 +88,7 @@ const ETF = {
 };
 Object.entries(ETF).forEach(([t,[n,w,d]])=>{ CO[t]={n,x:"US-listed ETF",r:"AM",w,etf:true}; DOM[t]=d; });
 Object.assign(DOM, {ASTS:"ast-science.com",IRDM:"iridium.com",SATS:"echostar.com",RBLX:"roblox.com",EA:"ea.com",TTWO:"take2games.com",SOFI:"sofi.com",
-  NU:"nu.com.mx",HOOD:"robinhood.com","1024.HK":"kuaishou.com",MTCH:"mtch.com",BMBL:"bumble.com",PTON:"onepeloton.com",ANGH:"anghami.com","RMS.PA":"hermes.com","CFR.SW":"richemont.com","UHR.SW":"swatchgroup.com"});
+  NU:"nu.com.mx",HOOD:"robinhood.com","1024.HK":"kuaishou.com",MTCH:"mtch.com",BMBL:"bumble.com",PTON:"onepeloton.com",SPCX:"spacex.com",RVI:"robinhood.com",DXYZ:"destiny.xyz",ANGH:"anghami.com","RMS.PA":"hermes.com","CFR.SW":"richemont.com","UHR.SW":"swatchgroup.com"});
 
 /* ---------- Category templates ---------- */
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -104,7 +107,8 @@ const ARCH = {
     insight:"Most of a delivery order goes to the restaurant and the courier. The app keeps a commission, typically 15–30%."},
   streaming:{l:"Video streaming",cat:"media",src:"netflix",slot:["NFLX"],prods:[["Monthly plan",12.99]]},
   music:{l:"Music streaming",cat:"media",src:"spotify",slot:["SPOT"],prods:[["Monthly plan",10.99]]},
-  ai:{l:"AI assistant",cat:"ai",src:"openai",slot:[],prods:[["Pro plan",20],["Max plan",100]]},
+  ai:{l:"AI assistant",cat:"ai",src:"openai",slot:[],prods:[["Pro plan",20],["Max plan",100]],
+    insight:"AI model makers spend most of your subscription on compute: cloud providers, and through them chipmakers, memory makers and power companies. Most frontier labs currently spend more than they earn."},
   software:{l:"Software subscription",cat:"software",src:"figma",slot:["FIG"],prods:[["Monthly plan",15]]},
   cafe:{l:"Coffee shop",cat:"food",src:"starbucks",slot:["SBUX"],prods:[["Monthly coffee",60]]},
   grocery:{l:"Groceries",cat:"grocer",src:"groceries",slot:["WMT","COST","KR","AMZN","AD.AS","TSCO.L"],prods:[["Monthly shop",600]]},
@@ -405,7 +409,7 @@ const BRANDS = [
   ["robinhoodgold","Robinhood Gold","robinhood.com","fintech",["HOOD"],"Robinhood Markets",[["Gold",5]]],
   ["calm","Calm","calm.com","software",[],"Private",[["Subscription",14.99]]],
   // Well-known private companies (estimated)
-  ["starlink","Starlink","starlink.com","satellite",[],"Part of SpaceX, which is private"],
+  ["starlink","Starlink","starlink.com","satellite",["SPCX"],"Part of SpaceX, which listed on Nasdaq (SPCX) in June 2026"],
   ["tiktokshop","TikTok Shop","tiktok.com","ecommerce",[],"Owned by ByteDance (private)"],
   ["revolut","Revolut","revolut.com","fintech",[],"Private (UK)",[["Premium",9.99],["Metal",16.99]]],
   ["fortnite","Fortnite (Epic Games)","epicgames.com","games",[],"Epic Games is private; Tencent and Sony are shareholders",[["V-Bucks",20]]],
@@ -456,7 +460,7 @@ function addCustom(name, a, opts={}){
 // Listed shareholders of private companies (you can't buy the company, but you can buy them)
 const INVESTORS = {openai:["MSFT","9984.T","NVDA"], claude:["AMZN","GOOGL"], fortnite:["0700.HK","6758.T"], perplexity:["NVDA"], mistral:["ASML","NVDA"]};
 const PRIVATE = new Set(["openai","claude","perplexity","cursor","midjourney","canva","notion","shein","noon","ikea","bolt","ola","didi","zepto","subway","lidl","emirates",
-  "starlink","tiktokshop","revolut","fortnite","steam","discord","patreon","chanel","rolex","higgsfield","runway","pika","luma","suno","elevenlabs",
+  "tiktokshop","revolut","fortnite","steam","discord","patreon","chanel","rolex","higgsfield","runway","pika","luma","suno","elevenlabs",
   "characterai","replit","lovable","boltnew","v0","grok","mistral","gamma","krea","ideogram","poe","opusclip","capcut","granola","oura","whoop","strava","substack","calm"]);
 PRIVATE.forEach(k=>{ if(M[k]) M[k].private=true; });
 Object.entries(INVESTORS).forEach(([k,l])=>{ if(M[k]&&M[k].arch) M[k].stats[0]=[l.map(t=>CO[t].n).join(", "),"Listed investors (the company itself is private)"]; });
@@ -491,3 +495,25 @@ function waysToInvest(k){
   return {direct, investors, suppliers, peers, etfs:inv.etfs.filter(t=>CO[t])};
 }
 const PRIVATE_NOTE = "This company is private, so its financials aren't public. The breakdown is an expected cost structure based on the technology it uses and the type of business it runs, not company-reported data.";
+
+/* ---------- Pre-IPO routes: tokenized pre-IPO shares and listed private-company funds ---------- */
+// Verified PreStocks tokens on Solana (Jupiter token list). Economic exposure via an SPV, not equity.
+const PRE_TOKENS = [
+  {sym:"OPENAI",co:"OpenAI",brand:"openai",mint:"PreweJYECqtQwBtpxHL171nL2K6umo692gTm7Q3rpgF"},
+  {sym:"ANTHROPIC",co:"Anthropic",brand:"claude",mint:"Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw"},
+  {sym:"ANDURIL",co:"Anduril",mint:"PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB"},
+  {sym:"NEURALINK",co:"Neuralink",mint:"PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S"},
+  {sym:"FIGUREAI",co:"Figure AI",mint:"PreZad18qfPtbxNpMtMuAuX2zVpvkEU8DnJx56faCWd"},
+  {sym:"POLYMARKET",co:"Polymarket",mint:"Pre8AREmFPtoJFT8mQSXQLh56cwJmM7CFDRuoGBZiUP"},
+  {sym:"KALSHI",co:"Kalshi",mint:"PreLWGkkeqG1s4HEfFZSy9moCrJ7btsHuUtfcCeoRua"},
+];
+// Listed funds that hold the private company (from their published holdings, 2026)
+const PRE_FUNDS = {openai:["RVI","DXYZ"], claude:["RVI","DXYZ"], grok:["DXYZ"], revolut:["DXYZ"]};
+const IPO_NOTE = {openai:"OpenAI reportedly filed confidentially for a US IPO in June 2026.", claude:"Anthropic reportedly filed confidentially for a US IPO in June 2026."};
+const ROBINHOOD_TOKENS = {openai:"Robinhood has also issued OpenAI stock tokens to EU customers (on Arbitrum, moving to Robinhood Chain). They aren't available in the US."};
+let PRE_PX = null;   // live prices from Jupiter, keyed by mint
+async function loadPreTokens(){
+  if(PRE_PX) return PRE_PX;
+  try{ PRE_PX = await (await fetch("https://lite-api.jup.ag/price/v3?ids="+PRE_TOKENS.map(t=>t.mint).join(","))).json(); }catch(e){ PRE_PX = {}; }
+  return PRE_PX;
+}

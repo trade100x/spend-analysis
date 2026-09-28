@@ -28,7 +28,7 @@ async function refreshPrices(env) {
       for (const t of batch) {
         const v = d[yahoo(t)] || {};
         const pts = (v.timestamp || []).map((ts, j) => [ts, v.close?.[j]]).filter(p => p[1]).map(([ts, c]) => [ts, +c.toPrecision(5)]);
-        if (pts.length >= 13) out[t] = pts;
+        if (pts.length >= 2) out[t] = pts;
       }
     } catch (e) { /* keep going; missing symbols fall back to the static file */ }
   }

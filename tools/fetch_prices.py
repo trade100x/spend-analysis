@@ -22,7 +22,7 @@ for i in range(0, len(pairs), 20):
     for t, y in batch:
         v = data.get(y) or {}
         pts = [[ts, float(f"{c:.5g}")] for ts, c in zip(v.get("timestamp") or [], v.get("close") or []) if c]
-        if len(pts) >= 13: out[t] = pts
+        if len(pts) >= 2: out[t] = pts
         else: missing.append(t)
     time.sleep(0.4)
 

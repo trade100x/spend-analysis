@@ -13,6 +13,7 @@
     padding:16px;display:flex;flex-direction:column;gap:12px;transition:transform .45s cubic-bezier(.2,.8,.2,1);font-family:Inter,system-ui,sans-serif}
   .subbar.on{transform:none}
   .subbar .sb-txt b{display:block;font-size:15px;font-weight:600;letter-spacing:-.01em;padding-right:18px}
+  .subbar .sb-txt strong{font-weight:600;color:#111113}
   .subbar .sb-txt span{display:block;font-size:12.5px;color:#6f6f78;line-height:1.4;margin-top:3px}
   .subbar form{display:flex;flex-direction:column;gap:6px}
   .subbar input[type=email]{width:100%;height:38px;border:1px solid #ebebea;border-radius:10px;padding:0 12px;font:inherit;font-size:14px;outline:none;background:#fff;color:#111113;box-sizing:border-box}
@@ -40,12 +41,12 @@
   bar.innerHTML = `
     <button class="sb-x" aria-label="Dismiss">×</button>
     <div class="sb-txt"><b>Spend on it. Own a piece of it.</b>
-      <span id="sb-sub">Get early access to our tool that turns your everyday spending into an investing plan.</span>
+      <span id="sb-sub">Coming soon: <strong>agentic cards</strong>. Each card is tied to one tool (ChatGPT, Netflix, Uber…) and manages that spend for you. A personal CFO for everyone.</span>
       <div class="sb-msg" id="sb-msg"></div></div>
     <form novalidate>
       <input type="email" name="email" placeholder="you@email.com" autocomplete="email" required aria-label="Email address">
       <input class="sb-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <button type="submit">Get early access</button>
+      <button type="submit">Join the waitlist</button>
     </form>`;
   document.body.appendChild(bar);
   document.body.classList.add("sb-pad");
@@ -70,10 +71,10 @@
       store.set("sa-sub", "done");
       bar.classList.add("done");
       bar.querySelector(".sb-txt b").textContent = d.already ? "You're already on the list ✓" : "You're on the list ✓";
-      bar.querySelector("#sb-sub").textContent = "We'll email you when early access opens. No spam.";
+      bar.querySelector("#sb-sub").textContent = "We'll email you when agentic cards launch. No spam.";
     } catch (err) {
       msg(err.message || "Something went wrong. Please try again.");
-      btn.disabled = false; btn.textContent = "Get early access";
+      btn.disabled = false; btn.textContent = "Join the waitlist";
     }
   };
 })();
