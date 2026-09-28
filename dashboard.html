@@ -108,6 +108,63 @@ body.open{overflow:hidden}
 .vt button.on{background:var(--text);color:var(--bg)}
 .buy{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:3px 10px;font-size:12px;cursor:pointer;margin-left:8px;flex:none}
 .buy:hover{background:var(--text);color:var(--bg)}
+.tagdemo{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6d28d9;background:#ede9fe;border-radius:6px;padding:2px 6px;margin-left:6px;vertical-align:2px}
+.agbtns{display:flex;gap:6px}
+.pbtn{border:0;background:var(--text);color:var(--bg);border-radius:99px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer}
+.pbtn.ghost{background:none;color:var(--muted);border:1px solid var(--line)}
+.pbtn:disabled{opacity:.5;cursor:default}
+.agsub{color:var(--muted);font-size:14px;margin:0 0 14px}
+.agrid{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x proximity}
+.acard{flex:0 0 190px;height:120px;border-radius:14px;padding:12px;color:#fff;position:relative;overflow:hidden;cursor:pointer;scroll-snap-align:start;
+  display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 8px 20px -10px rgba(0,0,0,.35);transition:transform .2s, box-shadow .2s, outline-color .2s;outline:3px solid transparent;outline-offset:2px}
+.acard::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 100% 0%,rgba(255,255,255,.18),transparent 55%)}
+.acard>*{position:relative}
+.acard .top{display:flex;align-items:center;gap:7px}
+.acard .top .logo{border:0}
+.acard .nm{font-size:13px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acard .st{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:rgba(255,255,255,.2);border-radius:5px;padding:2px 5px}
+.acard .st.paused,.acard .st.frozen{background:rgba(0,0,0,.35)}
+.acard .rule{font-size:10.5px;opacity:.85;line-height:1.3}
+.acard .bar{height:4px;background:rgba(255,255,255,.25);border-radius:99px;overflow:hidden;margin:4px 0 3px}
+.acard .bar i{display:block;height:100%;background:#fff;border-radius:99px;transition:width .5s}
+.acard .ft{display:flex;justify-content:space-between;font-size:10.5px;opacity:.9;font-variant-numeric:tabular-nums}
+.acard.flash-ok{outline-color:#22c55e;transform:translateY(-3px)}
+.acard.flash-no{outline-color:#ef4444;transform:translateY(-3px)}
+.acard.flash-hold{outline-color:#f59e0b;transform:translateY(-3px)}
+.acard.new{animation:pop .5s ease}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+.acard.sel{outline-color:var(--text)}
+.agedit{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 12px}
+.agedit input{width:90px;height:32px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font:inherit;text-align:right}
+.agedit ul{margin:0;padding-left:18px;flex-basis:100%}
+.agstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 12px}
+.agstats div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12px;color:var(--muted)}
+.agstats b{display:block;font-size:17px;color:var(--text);font-variant-numeric:tabular-nums}
+.feed .ev{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);animation:pop .35s ease}
+.feed .ev .main{flex:1;min-width:0}
+.feed .ev .t{font-weight:500;font-size:14px}
+.feed .ev .s{font-size:12.5px;color:var(--muted)}
+.feed .ev .amt{font-variant-numeric:tabular-nums;font-size:14px;text-align:right}
+.badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;border-radius:6px;padding:2px 7px;margin-top:3px}
+.badge.ok{background:#dcfce7;color:#166534}.badge.no{background:#fee2e2;color:#991b1b}.badge.hold{background:#fef3c7;color:#92400e}
+.feed .acts{display:flex;gap:6px;margin-top:6px}
+.feed .acts button{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:3px 10px;font-size:12px;cursor:pointer}
+.feed .acts button:first-child{background:var(--text);color:var(--bg);border-color:var(--text)}
+.mtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.mtabs button:not(.pbtn){border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:5px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
+.mtabs button.on{border-color:var(--text);color:var(--text)}
+.mtabs .pbtn{margin-left:auto}
+.term{background:#0b0b0d;color:#e4e4e7;border-radius:14px;padding:16px 18px;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;min-height:300px;max-height:460px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.term .p{color:#a1a1aa}.term .u{color:#fafafa;font-weight:600}.term .tool{color:#c4b5fd}.term .ok{color:#86efac}.term .no{color:#fca5a5}.term .dim{color:#71717a}.term .a{color:#e4e4e7}
+.term .cur{display:inline-block;width:7px;height:14px;background:#e4e4e7;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.chat{background:var(--soft);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif;white-space:normal}
+.chat .b{max-width:85%;border-radius:14px;padding:9px 12px;margin:0 0 8px}
+.chat .b.me{margin-left:auto;background:var(--text);color:var(--bg)}
+.chat .b.ai{background:var(--bg);border:1px solid var(--line)}
+.chat .tc{display:inline-flex;gap:6px;align-items:center;font:12px ui-monospace,Menlo,monospace;background:#ede9fe;color:#5b21b6;border-radius:8px;padding:4px 8px;margin:0 0 8px}
+.chat .tc.no{background:#fee2e2;color:#991b1b}.chat .tc.ok{background:#dcfce7;color:#166534}
+@media (max-width:560px){ .agstats{grid-template-columns:1fr} .acard{flex-basis:170px} }
 .sheet h4{font-size:13px;font-weight:600;margin:28px 0 8px;color:var(--text)}
 
 .node{border-top:1px solid var(--line)}
@@ -161,6 +218,23 @@ body.open{overflow:hidden}
     <div class="stack" id="stack"></div>
     <div class="legend" id="legend"></div>
   </div>
+
+  <section id="agents">
+    <div class="sh"><h2>Agentic cards <span class="tagdemo">Demo</span></h2>
+      <div class="agbtns"><button class="pbtn" id="agRun">▶ Run demo</button><button class="pbtn ghost" id="agReset">Reset</button></div></div>
+    <p class="agsub">One virtual card per tool, each with its own rules. Charges are approved, declined or held for you automatically. Tap a card to change its limit.</p>
+    <div class="agrid" id="agCards"></div>
+    <div class="agstats" id="agStats"></div>
+    <div class="feed" id="agFeed"></div>
+  </section>
+
+  <section id="mcp">
+    <div class="sh"><h2>Connect your cards to AI <span class="tagdemo">MCP · concept</span></h2></div>
+    <p class="agsub">Give Claude, Claude Code or any MCP-compatible agent a card of its own. The agent can pay for things, but only within the rules you set, and every charge shows up in your cards above.</p>
+    <div class="mtabs"><button class="on" data-t="cli">Claude Code (CLI)</button><button data-t="chat">Claude (chat)</button><button data-t="setup">Setup</button><button class="pbtn" id="mcpPlay">▶ Play</button></div>
+    <div class="term" id="mcpBody"></div>
+    <p class="src" style="margin-top:8px">Concept demo: simulated, no real cards or payments. The MCP server name is a placeholder and isn't published yet.</p>
+  </section>
 
   <section>
     <div class="sh"><h2>Your money funds</h2>
@@ -382,6 +456,178 @@ $("#market").value=state.market; $("#persona").value=state.persona;
 $("#market").onchange=e=>{state.market=e.target.value;save();renderAll();};
 $("#persona").onchange=e=>{state.persona=e.target.value;save();renderFuture();};
 renderAll();
+
+/* ---------- Agentic cards demo (simulated) ---------- */
+const AG0 = [
+  {k:"openai",name:"ChatGPT",last4:"2041",limit:25,lock:true,rules:["Locked to OpenAI","Monthly cap"]},
+  {k:"netflix",name:"Netflix",last4:"7730",limit:20,lock:true,priceGuard:17.99,rules:["Price-hike guard","Locked to Netflix"]},
+  {k:"spotify",name:"Spotify",last4:"5512",limit:12,lock:true,rules:["Locked to Spotify","Blocks look-alike merchants"]},
+  {k:"uber",name:"Uber",last4:"3309",limit:150,lock:true,perTxn:50,rules:["Per-ride cap $50","Monthly cap"]},
+  {k:"figma",name:"Figma",last4:"8124",limit:20,lock:true,idle:true,rules:["Auto-pause after 30 days unused"]},
+  {k:"amazon",name:"Amazon",last4:"6671",limit:250,lock:true,investBack:.05,rules:["Invests 5% back in the companies you buy from"]},
+  {k:"apple",name:"iCloud+",last4:"1190",limit:10,lock:true,rules:["Locked to Apple","Monthly cap"]},
+  {k:"trial",name:"Free-trial shield",last4:"0001",limit:1,lock:false,trial:true,rules:["$1 limit: trials can't convert into charges"]},
+];
+const AG_EVENTS = [
+  {card:"openai",merchant:"OpenAI",label:"ChatGPT Plus renewal",amt:20},
+  {card:"openai",merchant:"OpenAI",label:"API usage top-up",amt:48.2},
+  {card:"netflix",merchant:"Netflix",label:"Netflix Standard (new price)",amt:22.99},
+  {card:"spotify",merchant:"Spotify",label:"Spotify Premium",amt:11.99},
+  {card:"spotify",merchant:"SPTFY*PROMO LTD",label:"Look-alike merchant",amt:4.99,alien:true},
+  {card:"uber",merchant:"Uber",label:"Uber ride · 2.1× surge",amt:86.4},
+  {card:"uber",merchant:"Uber",label:"Uber ride",amt:24.6},
+  {card:"figma",merchant:"Figma",label:"Figma Professional renewal",amt:20},
+  {card:"trial",merchant:"Adobe",label:"Creative Cloud trial converting",amt:59.99},
+  {card:"amazon",merchant:"Amazon",label:"Amazon.com order",amt:129},
+  {card:"apple",merchant:"Apple",label:"iCloud+ 2TB",amt:9.99},
+];
+let AG=[], agStats={ok:0,no:0,inv:0}, agTimer=null, agSel=null;
+const agLogo = c => M[c.k] ? mLogo(c.k,"sm") : c.k==="trial" ? `<span class="logo sm"><span class="emo">🛡️</span></span>` : `<span class="logo sm">${logo(c.domain,c.name,"#52525b","sm").replace(/^<span class="logo sm">|<\/span>$/g,"")}</span>`;
+const agBg = c => { const col=(M[c.k]&&M[c.k].color)||c.color||"#27272a"; return `linear-gradient(135deg, ${col} 0%, #0b0b0d 130%)`; };
+function agReset(){ clearTimeout(agTimer); AG=AG0.map(c=>({...c,spent:0,status:c.idle?"paused":"active"})); agStats={ok:0,no:0,inv:0}; agSel=null; $("#agFeed").innerHTML=""; $("#agRun").disabled=false; agRender(); }
+function agRender(){
+  $("#agCards").innerHTML=AG.map(c=>`<div class="acard ${c.isNew?"new":""} ${agSel===c.last4?"sel":""}" data-l4="${c.last4}" style="background:${agBg(c)}">
+    <div class="top">${agLogo(c)}<span class="nm">${esc(c.name)}</span><span class="st ${c.status}">${c.status}</span></div>
+    <div><div class="rule">${esc(c.rules[0])}</div>
+      <div class="bar"><i style="width:${Math.min(100,c.spent/c.limit*100)}%"></i></div>
+      <div class="ft"><span>${fmt(c.spent)} / ${fmt(c.limit)}</span><span>•••• ${c.last4}</span></div></div></div>`).join("")
+    + (agSel?(()=>{ const c=AG.find(x=>x.last4===agSel); return `</div><div class="agedit" id="agEdit"><b style="color:var(--text)">${esc(c.name)} card rules</b>
+      <label>Monthly limit $<input id="agLim" inputmode="decimal" value="${c.limit}"></label>
+      <button class="pbtn ghost" id="agToggle">${c.status==="active"?"Pause card":"Resume card"}</button>
+      <ul>${c.rules.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>`; })():"");
+  // the edit panel sits right after the card row
+  const ed=$("#agEdit"); if(ed){ $("#agCards").after(ed); }
+  document.querySelectorAll("#agCards .acard").forEach(el=>el.onclick=()=>{ agSel = agSel===el.dataset.l4?null:el.dataset.l4; document.querySelectorAll(".agedit").forEach(x=>x.remove()); agRender(); });
+  if($("#agLim")) $("#agLim").oninput=e=>{ const c=AG.find(x=>x.last4===agSel); c.limit=Math.max(0,parseFloat(e.target.value)||0); agRenderCardsOnly(); };
+  if($("#agToggle")) $("#agToggle").onclick=()=>{ const c=AG.find(x=>x.last4===agSel); c.status=c.status==="active"?"paused":"active"; document.querySelectorAll(".agedit").forEach(x=>x.remove()); agRender(); };
+  $("#agStats").innerHTML=`<div>Approved<b>${fmt(agStats.ok)}</b></div><div>Blocked or held<b>${fmt(agStats.no)}</b></div><div>Invested back<b>${fmt(agStats.inv)}</b></div>`;
+}
+function agRenderCardsOnly(){ const sel=agSel; document.querySelectorAll(".agedit").forEach(x=>x.remove()); agRender(); agSel=sel; }
+function agDecide(c,e){
+  if(c.status!=="active") return ["no", c.idle?`Card paused: no ${c.name} logins in 45 days. You just saved ${fmt(e.amt)}.`:"Card is paused."];
+  if(c.lock && e.alien) return ["no",`"${e.merchant}" isn't ${c.name}. Card is locked to one merchant, so look-alike and card-testing charges bounce.`];
+  if(c.trial) return ["no","Free trial tried to convert into a paid plan. You never opted in, so the shield declined it."];
+  if(c.perTxn && e.amt>c.perTxn) return ["no",`Over the ${fmt(c.perTxn)} per-ride cap (surge pricing). Try again when surge drops.`];
+  if(c.priceGuard && e.amt>c.priceGuard+0.01) return ["hold",`Price went up from ${fmt(c.priceGuard)} to ${fmt(e.amt)}. Holding the charge until you approve.`];
+  if(c.spent+e.amt>c.limit) return ["no",`Would take this card to ${fmt(c.spent+e.amt)}, over its ${fmt(c.limit)} monthly limit.`];
+  return ["ok", c.investBack?`Within limit. ${fmt(e.amt*c.investBack)} invested back in ${esc(M[c.k]?.name||c.name)} automatically.`:`Within limit (${fmt(c.limit-c.spent-e.amt)} left this month).`];
+}
+function agApply(c,e,d){
+  const el=document.querySelector(`.acard[data-l4="${c.last4}"]`);
+  if(d==="ok"){ c.spent+=e.amt; agStats.ok+=e.amt; if(c.investBack) agStats.inv+=e.amt*c.investBack; } else agStats.no+=e.amt;
+  agRenderCardsOnly();
+  const el2=document.querySelector(`.acard[data-l4="${c.last4}"]`); if(el2){ el2.classList.add("flash-"+d); setTimeout(()=>el2.classList.remove("flash-"+d),900); }
+}
+function agPush(e){
+  const c=AG.find(x=>x.k===e.card)||AG.find(x=>x.last4===e.card); if(!c) return;
+  const [d,why]=agDecide(c,e), id="ev"+Math.random().toString(36).slice(2);
+  $("#agFeed").insertAdjacentHTML("afterbegin",`<div class="ev" id="${id}">${agLogo(c)}<div class="main"><div class="t">${esc(e.label)} <span style="color:var(--faint);font-weight:400">· ${esc(e.merchant)}</span></div>
+    <div class="s">${why}</div><span class="badge ${d}">${{ok:"APPROVED",no:"DECLINED",hold:"NEEDS YOUR OK"}[d]}</span>
+    ${d==="hold"?`<div class="acts"><button data-a="ok">Approve ${fmt(e.amt)}</button><button data-a="no">Decline</button></div>`:""}</div>
+    <div class="amt">${fmt(e.amt)}<div style="font-size:11px;color:var(--faint)">•••• ${c.last4}</div></div></div>`);
+  agApply(c,e,d==="hold"?"hold":d); if(d==="hold") agStats.no-=0;
+  const row=$("#"+id);
+  row.querySelectorAll(".acts button").forEach(b=>b.onclick=()=>{ const ok=b.dataset.a==="ok";
+    if(ok){ c.priceGuard=e.amt; c.spent+=e.amt; agStats.ok+=e.amt; agStats.no-=e.amt; }
+    row.querySelector(".badge").className="badge "+(ok?"ok":"no"); row.querySelector(".badge").textContent=ok?"APPROVED BY YOU":"DECLINED BY YOU";
+    row.querySelector(".acts").remove(); agRenderCardsOnly(); });
+}
+function agRun(){ agReset(); $("#agRun").disabled=true; let i=0; const step=()=>{ if(i>=AG_EVENTS.length){ $("#agRun").disabled=false; return; } agPush(AG_EVENTS[i++]); agTimer=setTimeout(step,1300); }; step(); }
+$("#agRun").onclick=agRun; $("#agReset").onclick=agReset;
+agReset();
+
+/* ---------- MCP demo: an AI agent with its own card (simulated) ---------- */
+const MCP_PKG = "@agentic-cards/mcp";   // placeholder name, not published
+const CLI_SCRIPT = [
+  ["p","$ ","type","claude mcp add agentic-cards -- npx -y "+MCP_PKG],
+  ["ok","✓ Added MCP server agentic-cards (tools: list_cards, create_card, pay, set_rules, freeze_card, approve_hold)"],
+  ["p","$ ","type","claude"],
+  ["u","> ","type","Renew our Figma seats for the design team. Keep it under $250 and make sure nothing else can be charged."],
+  ["tool","● agentic-cards · create_card"],
+  ["dim",'  { "merchant": "figma.com", "limit_usd": 250, "single_use": true, "expires_in_days": 7 }'],
+  ["ok","  → card •••• 7342 created · locked to figma.com · $250 cap","card"],
+  ["tool","● agentic-cards · pay"],
+  ["dim",'  { "card": "7342", "merchant": "figma.com", "amount_usd": 240.00 }'],
+  ["ok","  → approved · $240.00 · $10.00 left","pay"],
+  ["tool","● agentic-cards · freeze_card"],
+  ["dim",'  { "card": "7342" }'],
+  ["ok","  → frozen","freeze"],
+  ["a","Done. Figma renewed for $240 on a single-use card, which is now frozen so nothing else can charge it."],
+  ["u","> ","type","Also buy the $300 Midjourney team plan."],
+  ["tool","● agentic-cards · pay"],
+  ["dim",'  { "merchant": "midjourney.com", "amount_usd": 300.00 }'],
+  ["no","  → declined · no card allows midjourney.com · AI tools budget has $60 left this month"],
+  ["a","I couldn't buy it: it's over your AI tools budget. Want me to request a $300 card for Midjourney? You'll get an approval notification first."],
+];
+const CHAT_SCRIPT = [
+  ["me","Book the cheapest refundable flight to Dubai next Friday, under $600."],
+  ["tc","create_card · merchant: emirates.com · limit $600 · single use"],
+  ["tc ok","card •••• 5518 created","card2"],
+  ["tc","pay · emirates.com · $482.00"],
+  ["tc ok","approved · $118.00 left on card","pay2"],
+  ["ai","Booked: Emirates EK004, Friday 08:15, refundable, $482. I paid with a single-use card capped at $600, and it's frozen now."],
+  ["me","Add lounge access too."],
+  ["tc no","pay · emirates.com · $140.00 → declined: card frozen after booking"],
+  ["ai","That card is frozen, so I can't add the lounge. Want me to request a new $140 card? You'll get an approval notification."],
+];
+let mcpTab="cli", mcpT=null;
+function mcpAddCard(kind){
+  if(kind==="card" && !AG.some(c=>c.last4==="7342")){ AG.push({k:"figma",name:"Claude agent · Figma",last4:"7342",limit:250,lock:true,spent:0,status:"active",isNew:true,rules:["Created by Claude via MCP","Single use, locked to figma.com"]}); agRenderCardsOnly(); }
+  if(kind==="pay"){ const c=AG.find(x=>x.last4==="7342"); if(c){ c.spent=240; agStats.ok+=240; agRenderCardsOnly(); } }
+  if(kind==="freeze"){ const c=AG.find(x=>x.last4==="7342"); if(c){ c.status="frozen"; agRenderCardsOnly(); } }
+  if(kind==="card2" && !AG.some(c=>c.last4==="5518")){ AG.push({k:"x_emirates",domain:"emirates.com",color:"#b91c1c",name:"Claude agent · Emirates",last4:"5518",limit:600,lock:true,spent:0,status:"active",isNew:true,rules:["Created by Claude via MCP","Single use, locked to emirates.com"]}); agRenderCardsOnly(); }
+  if(kind==="pay2"){ const c=AG.find(x=>x.last4==="5518"); if(c){ c.spent=482; c.status="frozen"; agStats.ok+=482; agRenderCardsOnly(); } }
+}
+function mcpSetup(){
+  $("#mcpBody").className="term";
+  $("#mcpBody").innerHTML=`<span class="dim"># Claude Code (CLI)</span>
+<span class="p">$</span> claude mcp add agentic-cards -- npx -y ${MCP_PKG}
+
+<span class="dim"># Claude Desktop · claude_desktop_config.json</span>
+{
+  "mcpServers": {
+    "agentic-cards": {
+      "command": "npx",
+      "args": ["-y", "${MCP_PKG}"],
+      "env": { "AGENTIC_CARDS_TOKEN": "&lt;your token&gt;" }
+    }
+  }
+}
+
+<span class="dim"># Tools the agent gets</span>
+<span class="tool">list_cards</span>     see your cards, limits and what's left
+<span class="tool">create_card</span>    new virtual card locked to one merchant, with a cap and expiry
+<span class="tool">pay</span>            charge a card; your rules decide approve / decline / hold
+<span class="tool">set_rules</span>      change limits (big changes need your approval)
+<span class="tool">freeze_card</span>    stop a card instantly
+<span class="tool">approve_hold</span>   ask you to approve a held charge
+
+<span class="dim"># Guardrails: the agent can never exceed a limit, change merchant locks,
+# or unfreeze a card without your approval on your phone.</span>`;
+}
+function mcpPlay(){
+  clearTimeout(mcpT);
+  if(mcpTab==="setup"){ mcpSetup(); return; }
+  const el=$("#mcpBody");
+  if(mcpTab==="cli"){
+    el.className="term"; el.innerHTML=""; let i=0;
+    const next=()=>{ if(i>=CLI_SCRIPT.length){ el.insertAdjacentHTML("beforeend",`<span class="p">&gt; </span><span class="cur"></span>`); return; }
+      const [cls,a,b,c]=CLI_SCRIPT[i++];
+      if(b==="type"){ const line=document.createElement("div"); line.innerHTML=`<span class="${cls==="u"?"p":"p"}">${esc(a)}</span><span class="${cls==="u"?"u":"a"}"></span>`; el.appendChild(line);
+        const span=line.lastChild; let j=0; const typeIt=()=>{ span.textContent=c.slice(0,++j); el.scrollTop=el.scrollHeight; if(j<c.length) mcpT=setTimeout(typeIt,14); else mcpT=setTimeout(next,380); }; typeIt(); }
+      else { el.insertAdjacentHTML("beforeend",`<div class="${cls}">${esc(a)}</div>`); el.scrollTop=el.scrollHeight; if(b) mcpAddCard(b); mcpT=setTimeout(next, cls==="a"?900:520); } };
+    next();
+  } else {
+    el.className="term chat"; el.innerHTML=""; let i=0;
+    const next=()=>{ if(i>=CHAT_SCRIPT.length) return; const [cls,txt,kind]=CHAT_SCRIPT[i++];
+      el.insertAdjacentHTML("beforeend", cls.startsWith("tc") ? `<div><span class="${cls}">⚙ ${esc(txt)}</span></div>` : `<div class="b ${cls}">${esc(txt)}</div>`);
+      el.scrollTop=el.scrollHeight; if(kind) mcpAddCard(kind); mcpT=setTimeout(next, cls==="me"?700:cls.startsWith("tc")?600:1000); };
+    next();
+  }
+}
+document.querySelectorAll(".mtabs button[data-t]").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".mtabs button[data-t]").forEach(x=>x.classList.toggle("on",x===b)); mcpTab=b.dataset.t; mcpPlay(); });
+$("#mcpPlay").onclick=mcpPlay;
+mcpSetup(); $("#mcpBody").className="term"; $("#mcpBody").innerHTML=`<span class="dim">Press ▶ Play to watch Claude Code create and use its own card.</span>`;
 </script>
 </body>
 </html>

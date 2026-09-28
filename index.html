@@ -253,6 +253,7 @@ function matchBrand(app){
   return Object.keys(M).find(k=>!M[k].custom&&!M[k].group&&(M[k].name.toLowerCase()===n||(n.length>=4&&M[k].name.toLowerCase().split(" (")[0]===n)))||null;
 }
 let trending={cc:null,apps:[]};
+const TREND_KEY={};   // app name -> brand key it was added as
 async function loadTrending(){
   const cc=APPSTORE_CC[COUNTRY]; if(trending.cc===cc) return;
   trending={cc,apps:[]};
@@ -296,7 +297,9 @@ function renderTiles(){
   let html="";
   if(!q){
     const tr=trending.apps.slice(0,20).map((a,i)=>{ const k=matchBrand(a.full)||matchBrand(a.name);
-      return k ? tile(k) : `<button class="tile" data-app="${i}"><img class="ico" src="${esc(a.icon||"")}" alt="" loading="lazy">${esc(a.name.slice(0,22))}<small>${esc(a.cat)}</small></button>`; }).join("");
+      if(k) return tile(k);
+      const on=TREND_KEY[a.name]&&lines.some(l=>l.k===TREND_KEY[a.name]);
+      return `<button class="tile ${on?"on":""}" data-app="${i}"><img class="ico" src="${esc(a.icon||"")}" alt="" loading="lazy">${esc(a.name.slice(0,22))}<small>${esc(a.cat)}</small></button>`; }).join("");
     html=`${tr?`<div class="glabel">Trending now · top-grossing apps in the ${esc(COUNTRIES[COUNTRY]==="Other / global"?"US":COUNTRIES[COUNTRY])} App Store</div><div class="tiles trend">${tr}</div>`:""}
       <div class="glabel">Popular brands</div><div class="tiles">${POPULAR.map(tile).join("")}</div>
       <div class="glabel">Trending in AI</div><div class="tiles">${AI_TREND.map(tile).join("")}</div>
@@ -315,8 +318,12 @@ function renderTiles(){
   $("#tiles").innerHTML=html;
   $("#tiles").querySelectorAll(".tile").forEach(b=>b.onclick=()=>toggle(b.dataset.k));
   $("#tiles").querySelectorAll(".chipbtn").forEach(b=>b.onclick=async()=>{ const res=await lookupBrand(q); addFromLookup(res.found&&res.name?res.name:q,b.dataset.a,res); $("#q").value=""; renderTiles(); });
-  $("#tiles").querySelectorAll("[data-app]").forEach(b=>b.onclick=async()=>{ const a=trending.apps[+b.dataset.app]; b.style.opacity=.5;
-    const res=await lookupBrand(a.name); addFromLookup(a.name, APP_ARCH[a.cat]||"software", res); renderTiles(); });
+  $("#tiles").querySelectorAll("[data-app]").forEach(b=>b.onclick=async()=>{ const a=trending.apps[+b.dataset.app], k0=TREND_KEY[a.name];
+    if(k0&&lines.some(l=>l.k===k0)){ lines=lines.filter(l=>l.k!==k0); renderTiles(); renderLines(); return; }   // tap again to unselect
+    b.classList.add("on");
+    if(k0){ addLine(k0); renderTiles(); return; }
+    const res=await lookupBrand(a.name); const k=addCustom(a.name, APP_ARCH[a.cat]||"software", res&&res.found?{owners:res.owners,site:res.site,qid:res.qid}:{});
+    TREND_KEY[a.name]=k; MDOM[k]=MDOM[k]; M[k].icon=a.icon; if(!lines.some(l=>l.k===k)) addLine(k); renderTiles(); });
   if(q.length>=3 && !LOOK[ql]) { clearTimeout(renderTiles.t); renderTiles.t=setTimeout(()=>lookupBrand(q).then(()=>{ if($("#q").value.trim().toLowerCase()===ql) renderTiles(); }),450); }
 }
 function addLine(k,pid){ const p=product(k,pid); lines.push({k,p:p.id,amt:p.price}); renderLines(); }

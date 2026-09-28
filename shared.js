@@ -268,7 +268,7 @@ function logo(domain, label, color, size=""){
 // Google favicons first; if it's tiny or missing, try DuckDuckGo; else keep the letter tile
 function logoLoaded(img){ if(img.naturalWidth<=16) return logoFailed(img); img.previousElementSibling?.remove(); }
 function logoFailed(img){ if(!img.dataset.alt){ img.dataset.alt=1; img.src=`https://icons.duckduckgo.com/ip3/${img.dataset.d}.ico`; } else img.remove(); }
-const mLogo = (k,size="") => M[k].emoji ? `<span class="logo ${size}"><span class="emo">${M[k].emoji}</span></span>` : logo(MDOM[k], M[k].name, M[k].color, size);
+const mLogo = (k,size="") => M[k].icon ? `<span class="logo ${size}"><img src="${M[k].icon}" alt="" style="width:100%;height:100%;object-fit:cover"></span>` : M[k].emoji ? `<span class="logo ${size}"><span class="emo">${M[k].emoji}</span></span>` : logo(MDOM[k], M[k].name, M[k].color, size);
 const cLogo = (tk,size) => logo(DOM[tk], CO[tk].n, "#71717a", size);
 
 // Walk a purchase's supply chain; pid picks the product (defaults to the brand's first)
