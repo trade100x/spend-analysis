@@ -463,8 +463,68 @@ function localize(root){
   if(COUNTRY==="XX") return root;
   const key=COUNTRY; if(!root.__id) root.__id=Math.random().toString(36).slice(2);
   const ck=root.__id+key; if(_locCache[ck]) return _locCache[ck];
-  const walk=n=>({...n, cos:(n.local&&n.local[key])||n.cos, children:(n.children||[]).map(walk)});
+  const walk=n=>({...n, cos:(n.local&&n.local[key])||swapCos(n.cos), children:(n.children||[]).map(walk)});
   return _locCache[ck]=walk(root);
+}
+
+/* ---------- Regional supply chains: who delivers, sells and processes payments depends on where you live ---------- */
+// Sources: Apple's official India distributors are Redington and Ingram Micro; India e-commerce parcels are led by
+// Delhivery, Blue Dart, Shadowfax; Aramex is the Gulf's largest home-grown courier; Yamato/Sagawa/Japan Post dominate Japan.
+Object.assign(CO, {
+  "REDINGTON.NS":{n:"Redington",x:"NSE",r:"AP",w:"One of Apple's two official distributors in India"},
+  INGM:{n:"Ingram Micro",x:"NYSE",r:"AM",w:"Largest tech distributor; Apple's other official distributor in India"},
+  "DELHIVERY.NS":{n:"Delhivery",x:"NSE",r:"AP",w:"India's largest e-commerce parcel network"},
+  "BLUEDART.NS":{n:"Blue Dart",x:"NSE",r:"AP",w:"Premium Indian express courier (DHL group)"},
+  "SHADOWFAX.NS":{n:"Shadowfax",x:"NSE",r:"AP",w:"Indian last-mile delivery for e-commerce and quick commerce"},
+  "PAYTM.NS":{n:"Paytm (One97)",x:"NSE",r:"AP",w:"Indian payments app and merchant processor"},
+  "ARMX.DFM":{n:"Aramex",x:"DFM",r:"ME",w:"The Gulf's largest home-grown courier and e-commerce logistics network"},
+  "9064.T":{n:"Yamato Holdings",x:"TSE",r:"AP",w:"Japan's largest parcel carrier (Kuroneko)"},
+  "9143.T":{n:"SG Holdings (Sagawa)",x:"TSE",r:"AP",w:"Japan's second-largest parcel carrier"},
+  "6178.T":{n:"Japan Post Holdings",x:"TSE",r:"AP",w:"Japan Post parcels and banking"},
+  "3048.T":{n:"Bic Camera",x:"TSE",r:"AP",w:"Japanese electronics retailer"},
+  "9831.T":{n:"Yamada Holdings",x:"TSE",r:"AP",w:"Japan's largest electronics retailer"},
+  "9432.T":{n:"NTT (docomo)",x:"TSE",r:"AP",w:"Japan's largest mobile carrier"},
+  "9433.T":{n:"KDDI (au)",x:"TSE",r:"AP",w:"Japanese mobile carrier"},
+  "9434.T":{n:"SoftBank Corp",x:"TSE",r:"AP",w:"Japanese mobile carrier"},
+  "DHL.DE":{n:"DHL Group",x:"XETRA",r:"EU",w:"Largest parcel and express company in Europe"},
+  "PNL.AS":{n:"PostNL",x:"Euronext AMS",r:"EU",w:"Dutch parcels and post"},
+  "CURY.L":{n:"Currys",x:"LSE",r:"EU",w:"UK's largest electronics retailer"},
+  "AO.L":{n:"AO World",x:"LSE",r:"EU",w:"UK online electronics retailer"},
+  "BT-A.L":{n:"BT Group (EE)",x:"LSE",r:"EU",w:"UK's largest mobile and broadband provider"},
+  "CEC.DE":{n:"Ceconomy (MediaMarkt)",x:"XETRA",r:"EU",w:"Europe's largest electronics retailer"},
+  "FNAC.PA":{n:"Fnac Darty",x:"Euronext PAR",r:"EU",w:"French electronics retailer"},
+  "DTE.DE":{n:"Deutsche Telekom",x:"XETRA",r:"EU",w:"Largest European mobile carrier"},
+  "ORA.PA":{n:"Orange",x:"Euronext PAR",r:"EU",w:"French mobile carrier"},
+  "TEF.MC":{n:"Telefónica",x:"BME",r:"EU",w:"Spanish mobile carrier (Movistar)"},
+  "4190.SR":{n:"Jarir Marketing",x:"Tadawul",r:"ME",w:"Saudi electronics and books retailer"},
+  "4003.SR":{n:"United Electronics (eXtra)",x:"Tadawul",r:"ME",w:"Saudi electronics retailer"},
+  "7020.SR":{n:"Mobily",x:"Tadawul",r:"ME",w:"Saudi mobile carrier"},
+  "7030.SR":{n:"Zain KSA",x:"Tadawul",r:"ME",w:"Saudi mobile carrier"},
+  FDX:{n:"FedEx",x:"NYSE",r:"AM",w:"Parcel and express delivery"},
+});
+Object.assign(DOM, {"REDINGTON.NS":"redingtongroup.com",INGM:"ingrammicro.com","DELHIVERY.NS":"delhivery.com","BLUEDART.NS":"bluedart.com","SHADOWFAX.NS":"shadowfax.in",
+  "PAYTM.NS":"paytm.com","ARMX.DFM":"aramex.com","9064.T":"yamato-hd.co.jp","9143.T":"sg-hldgs.co.jp","6178.T":"japanpost.jp","3048.T":"biccamera.com","9831.T":"yamada-holdings.jp",
+  "9432.T":"ntt.co.jp","9433.T":"kddi.com","9434.T":"softbank.jp","DHL.DE":"dhl.com","PNL.AS":"postnl.nl","CURY.L":"currys.co.uk","AO.L":"ao.com","BT-A.L":"bt.com",
+  "CEC.DE":"ceconomy.de","FNAC.PA":"fnacdarty.com","DTE.DE":"telekom.com","ORA.PA":"orange.com","TEF.MC":"telefonica.com","4190.SR":"jarir.com","4003.SR":"extra.com",
+  "7020.SR":"mobily.com.sa","7030.SR":"sa.zain.com",FDX:"fedex.com"});
+// Local companies for each role
+const REGIONAL = {
+  US:{retail:["BBY","WMT","TGT"],carrier:["TMUS","VZ","T"],logistics:["UPS","FDX"],payments:["PYPL"],warehouse:["PLD"]},
+  IN:{retail:["RELIANCE.NS","REDINGTON.NS","INGM","WMT"],carrier:["RELIANCE.NS","BHARTIARTL.NS"],logistics:["DELHIVERY.NS","BLUEDART.NS","SHADOWFAX.NS"],payments:["PAYTM.NS"],warehouse:[]},
+  AE:{retail:["LULU.AD","CA.PA"],carrier:["EAND.AD","DU.DFM"],logistics:["ARMX.DFM"],payments:["ENBD.DFM"],warehouse:[]},
+  SA:{retail:["4190.SR","4003.SR"],carrier:["7010.SR","7020.SR","7030.SR"],logistics:["ARMX.DFM"],payments:[],warehouse:[]},
+  UK:{retail:["CURY.L","SBRY.L","AO.L"],carrier:["BT-A.L","VOD.L"],logistics:["DHL.DE"],payments:["ADYEN.AS"],warehouse:["PLD"]},
+  EU:{retail:["CEC.DE","FNAC.PA"],carrier:["DTE.DE","ORA.PA","TEF.MC"],logistics:["DHL.DE","PNL.AS"],payments:["ADYEN.AS"],warehouse:["PLD"]},
+  JP:{retail:["9831.T","3048.T"],carrier:["9432.T","9433.T","9434.T"],logistics:["9064.T","9143.T","6178.T"],payments:[],warehouse:["PLD"]},
+};
+// US-specific companies in the base supply chains, and the role each one plays
+const US_ROLE = {PLD:"warehouse",BBY:"retail",TGT:"retail",TMUS:"carrier",VZ:"carrier",T:"carrier",UPS:"logistics",FDX:"logistics",PYPL:"payments"};
+function swapCos(cos){
+  const R=REGIONAL[COUNTRY]; if(!R||!cos) return cos;
+  const out=[];
+  cos.forEach(t=>{ const role=US_ROLE[t]; if(role) out.push(...R[role]); else out.push(t); });
+  if(cos.includes("V")&&R.payments.length) out.push(...R.payments);   // local processors sit next to the card networks
+  return [...new Set(out)].slice(0,6);
 }
 /* ---------- Product lookup ---------- */
 function products(k){ return M[k].products || [{id:"default",n:M[k].name,price:20}]; }
@@ -473,7 +533,7 @@ function product(k,pid){ const ps=products(k); return ps.find(p=>p.id===pid)||ps
 function view(k,pid){
   const m=M[k], p=product(k,pid);
   return {k, p, name:m.name, pname:p.n, cat:m.cat, color:m.color, once:!!p.once,
-    root:m.group==="life"?localize(p.root||m.root):(p.root||m.root), insight:p.insight||m.insight,
+    root:localize(p.root||m.root), insight:p.insight||m.insight,
     stats:p.stats?[...p.stats,...m.stats].slice(0,3):m.stats,
     tokens:p.tokens||m.tokens||[], tokenNote:p.tokenNote||m.tokenNote||"No credible token exposure.",
     mix:m.mix, mixLabel:m.mixLabel, src:m.src||[]};

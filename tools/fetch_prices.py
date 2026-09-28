@@ -14,7 +14,7 @@ def yahoo(t):
     return t
 
 out, missing = {}, []
-pairs = [(t, yahoo(t)) for t in tickers]
+pairs = [(t, yahoo(t)) for t in tickers if not t.startswith("PRE:")]
 for i in range(0, len(pairs), 20):
     batch = pairs[i:i+20]
     url = "https://query1.finance.yahoo.com/v8/finance/spark?symbols=" + ",".join(urllib.parse.quote(y) for _, y in batch) + "&range=3y&interval=1mo"
