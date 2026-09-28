@@ -23,3 +23,12 @@ See where your money really goes. Pick what you spend on (brands, specific produ
 Hard figures (revenue, users, ownership stakes) were fact-checked against company filings and reputable reporting in Sep 2026. Supply-chain percentage splits, "next hop" company flows and listed-capture shares are **modelled estimates**, not audited company data. Not investment advice.
 
 Static files, no build step. Logos come from Google's favicon service, with DuckDuckGo as a fallback.
+
+## Early-access signups
+A sticky bar (`subscribe.js`) posts emails to the Cloudflare Worker (`worker.js`), which stores them in the `SUBSCRIBERS` KV namespace. It validates emails, drops bots via a hidden field, and de-duplicates.
+
+```
+npx wrangler kv key list --binding SUBSCRIBERS --remote              # all signups
+npx wrangler kv key get "sub:name@example.com" --binding SUBSCRIBERS --remote   # one signup's details
+```
+Deploy to Cloudflare with `npx wrangler deploy`.
