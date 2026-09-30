@@ -41,7 +41,7 @@
   bar.innerHTML = `
     <button class="sb-x" aria-label="Dismiss">×</button>
     <div class="sb-txt"><b>Your money just hired a CFO.</b>
-      <span id="sb-sub">A personal CFO that watches every subscription, cuts what you don't use, blocks surprise charges and invests the savings in the companies you already pay. Always on, built for everyone.</span>
+      <span id="sb-sub">An AI personal CFO with your bank account and cards built in. It budgets, pays your bills, cuts waste, grows your savings and invests alongside your spending, all on autopilot.</span>
       <div class="sb-msg" id="sb-msg"></div></div>
     <form novalidate>
       <input type="email" name="email" placeholder="you@email.com" autocomplete="email" required aria-label="Email address">
