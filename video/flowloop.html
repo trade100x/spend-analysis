@@ -10,10 +10,12 @@ html,body{width:1440px;height:1080px;overflow:hidden;background:var(--bg);font-f
 .abs{position:absolute}
 .serif{font-family:"Instrument Serif",Georgia,serif;font-weight:400;letter-spacing:-.01em}
 .scene{position:absolute;inset:0}
-.hd{position:absolute;left:64px;top:52px}
-.hd h1{font-family:"Instrument Serif",serif;font-weight:400;font-size:78px;line-height:1;letter-spacing:-.01em}
+.hd{position:absolute;left:72px;top:72px;display:flex;align-items:center;gap:26px}
+.hd .bi{width:104px;height:104px;border-radius:28px;background:#fff;display:grid;place-items:center;flex:none;box-shadow:0 14px 30px -18px rgba(0,0,0,.25),0 0 0 1px rgba(0,0,0,.04)}
+.hd .bi img{width:58%;height:58%;object-fit:contain}
+.hd h1{font-family:"Instrument Serif",serif;font-weight:400;font-size:74px;line-height:.95;letter-spacing:-.01em}
 .hd h1 i{color:var(--gray)}
-.hd p{font-size:24px;color:var(--muted);margin-top:10px}
+.hd p{font-size:24px;color:var(--muted);margin-top:8px}
 svg.w{position:absolute;inset:0}
 .node{position:absolute;display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:16px;padding:8px 14px 8px 10px;height:64px;width:250px;box-shadow:0 1px 0 rgba(0,0,0,.03)}
 .node.root{border:2px solid var(--text);width:260px}
@@ -26,7 +28,7 @@ svg.w{position:absolute;inset:0}
 .logo.t{color:#fff;font-weight:700;font-size:15px}
 .foot{position:absolute;left:0;right:0;bottom:36px;text-align:center;font-size:22px;color:var(--muted)}
 .foot b{color:var(--text);font-weight:600}
-.dots{position:absolute;right:64px;top:70px;display:flex;gap:10px}
+.dots{position:absolute;right:72px;top:119px;display:flex;gap:10px}
 .dots i{width:10px;height:10px;border-radius:99px;background:var(--line)}
 </style></head>
 <body><div class="stage" id="stage"></div>
@@ -39,10 +41,10 @@ const LG = {
   comcast:tile("C","#1f2a44"), google:img("google"), meta:img("meta"), ttd:img("thetradedesk"), amazon:img("amazon"), cisco:tile("C","#049fd9"),
   arista:img("arista"), corning:tile("C","#0a4d8c"), apple:img("apple"), samsung:img("samsung"), lgd:img("lgdisplay"), foxconn:img("foxconn"), tmobile:img("tmobile"),
 };
-const COL=[64,364,664,964,1164];   // x of each column (col 4 only used for the deepest step)
+const COL=[72,372,672,972,1172];   // x of each column (col 4 only used for the deepest step)
 // Each purchase: header + nodes. y = centre; t = appear time within the 8 s scene; p = parent id.
 const SCENES = [
-  { head:"Where your <i>$20</i> goes.", sub:"ChatGPT Plus · monthly", nodes:[
+  { head:"Where your <i>$20</i> goes.", sub:"ChatGPT Plus · monthly", icon:"openai", nodes:[
     {id:"r",c:0,y:560,t:.5,title:"ChatGPT Plus",sub:"$20.00",logo:LG.openai,root:1},
     {id:"cloud",c:1,y:420,t:1.0,title:"Cloud compute",sub:"$8.40",dot:"#4f7cff",p:"r"},
     {id:"keep",c:1,y:720,t:1.15,title:"Kept by OpenAI",sub:"$6.80 · private",dot:"#7c5cff",p:"r",priv:1},
@@ -51,17 +53,17 @@ const SCENES = [
     {id:"chips",c:2,y:290,t:1.7,title:"AI chips",sub:"$3.78",dot:"#22c55e",p:"cloud"},
     {id:"mem",c:2,y:470,t:1.85,title:"HBM memory",sub:"$0.94",dot:"#06b6d4",p:"cloud"},
     {id:"pow",c:2,y:620,t:2.0,title:"Power & cooling",sub:"$1.51",dot:"#f59e0b",p:"cloud"},
-    {id:"nvda",c:3,y:220,t:2.4,title:"NVIDIA",sub:"$0.50",logo:LG.nvidia,p:"chips",w:190},
+    {id:"nvda",c:3,y:220,t:2.4,title:"NVIDIA",sub:"$0.50",logo:LG.nvidia,p:"chips",w:180},
     {id:"tsmc",c:3,y:290,t:2.5,title:"TSMC",sub:"$0.93",logo:LG.tsmc,p:"chips",w:180},
-    {id:"amd",c:3,y:360,t:2.6,title:"AMD",sub:"$0.50",logo:LG.amd,p:"chips",w:190},
+    {id:"amd",c:3,y:360,t:2.6,title:"AMD",sub:"$0.50",logo:LG.amd,p:"chips",w:180},
     {id:"skh",c:3,y:440,t:2.8,title:"SK hynix",sub:"$0.32",logo:LG.skhynix,p:"mem"},
     {id:"mu",c:3,y:510,t:2.9,title:"Micron",sub:"$0.32",logo:LG.micron,p:"mem"},
     {id:"vrt",c:3,y:590,t:3.1,title:"Vertiv",sub:"$0.24",logo:LG.vertiv,p:"pow"},
     {id:"gev",c:3,y:660,t:3.2,title:"GE Vernova",sub:"$0.24",logo:LG.gev,p:"pow"},
-    {id:"asml",c:4,y:220,t:3.5,title:"ASML",sub:"$0.10",logo:LG.asml,p:"tsmc",x:1200},
-    {id:"tel",c:4,y:360,t:3.6,title:"Tokyo Electron",sub:"$0.10",logo:LG.tel,p:"tsmc",x:1200},
+    {id:"asml",c:4,y:220,t:3.5,title:"ASML",sub:"$0.10",logo:LG.asml,p:"tsmc",x:1178,w:190},
+    {id:"tel",c:4,y:360,t:3.6,title:"Tokyo Electron",sub:"$0.10",logo:LG.tel,p:"tsmc",x:1178,w:190},
   ]},
-  { head:"Where your <i>$17.99</i> goes.", sub:"Netflix Standard · monthly", nodes:[
+  { head:"Where your <i>$17.99</i> goes.", sub:"Netflix Standard · monthly", icon:"netflix", nodes:[
     {id:"r",c:0,y:560,t:.5,title:"Netflix Standard",sub:"$17.99",logo:LG.netflix,root:1},
     {id:"content",c:1,y:290,t:1.0,title:"Shows & films",sub:"$9.89",dot:"#e11d48",p:"r"},
     {id:"mkt",c:1,y:520,t:1.15,title:"Marketing & ads",sub:"$2.16",dot:"#f97316",p:"r"},
@@ -79,7 +81,7 @@ const SCENES = [
     {id:"anet",c:3,y:770,t:3.2,title:"Arista",sub:"$0.19",logo:LG.arista,p:"net"},
     {id:"glw",c:3,y:840,t:3.3,title:"Corning",sub:"$0.19",logo:LG.corning,p:"net"},
   ]},
-  { head:"Where your <i>$999</i> goes.", sub:"iPhone · one-off purchase", nodes:[
+  { head:"Where your <i>$999</i> goes.", sub:"iPhone · one-off purchase", icon:"apple", nodes:[
     {id:"r",c:0,y:560,t:.5,title:"iPhone",sub:"$999",logo:LG.apple,root:1},
     {id:"keep",c:1,y:250,t:1.0,title:"Kept by Apple",sub:"$339.66 · AAPL",logo:LG.apple,p:"r"},
     {id:"comp",c:1,y:560,t:1.15,title:"Components",sub:"$449.55",dot:"#0891b2",p:"r"},
@@ -95,19 +97,20 @@ const SCENES = [
     {id:"skh",c:3,y:595,t:3.05,title:"SK hynix",sub:"$20.98",logo:LG.skhynix,p:"mem"},
     {id:"mu",c:3,y:665,t:3.15,title:"Micron",sub:"$20.98",logo:LG.micron,p:"mem"},
     {id:"sony",c:3,y:760,t:3.3,title:"Sony",sub:"$16.18",logo:LG.sony,p:"cam"},
-    {id:"asml",c:4,y:280,t:3.5,title:"ASML",sub:"$5.39",logo:LG.asml,p:"tsmc",x:1200},
-    {id:"tel",c:4,y:380,t:3.6,title:"Tokyo Electron",sub:"$5.39",logo:LG.tel,p:"tsmc",x:1200},
+    {id:"asml",c:4,y:280,t:3.5,title:"ASML",sub:"$5.39",logo:LG.asml,p:"tsmc",x:1178,w:190},
+    {id:"tel",c:4,y:380,t:3.6,title:"Tokyo Electron",sub:"$5.39",logo:LG.tel,p:"tsmc",x:1178,w:190},
   ]},
 ];
 const SLEN=8, DURATION=SCENES.length*SLEN;
 window.DURATION=DURATION;
 const NH=64;
 const X=n=>n.x ?? COL[n.c], W=n=>n.w ?? (n.root?260:250);
+const OY=40; SCENES.forEach(sc=>sc.nodes.forEach(n=>n.y+=OY));
 
 /* ---------- build DOM once ---------- */
 const S=document.getElementById("stage");
 S.innerHTML = SCENES.map((sc,si)=>`<div class="scene" id="sc${si}">
-    <div class="hd"><h1>${sc.head}</h1><p>${sc.sub}</p></div>
+    <div class="hd"><div class="bi"><img src="logos/${sc.icon}.png"></div><div><h1>${sc.head}</h1><p>${sc.sub}</p></div></div>
     <svg class="w" id="w${si}" width="1440" height="1080"></svg>
     ${sc.nodes.map(n=>`<div class="node ${n.root?"root":""} ${n.priv?"priv":""}" id="n${si}_${n.id}" style="left:${X(n)}px;top:${n.y-NH/2}px;width:${W(n)}px">
       ${n.logo?n.logo:`<span class="dot" style="background:${n.dot}"></span>`}<div style="min-width:0"><b>${n.title}</b><span>${n.sub}</span></div></div>`).join("")}
