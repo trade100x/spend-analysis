@@ -2,6 +2,7 @@
 //   POST /api/subscribe   early-access signups -> D1 table `subscribers` (Cloudflare dashboard: Storage & Databases > D1 > spend-analysis)
 //   GET  /api/prices      monthly closes for every company (refreshed daily by cron from Yahoo Finance; falls back to /prices.json)
 //   GET  /api/lookup?q=   who owns a brand, and whether that owner is listed (Wikidata), cached 30 days
+//   GET  /api/tg-link     links the Telegram chat for signup notifications (no-op once linked)
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -98,6 +99,39 @@ async function lookup(env, q) {
   return { q, found: false };
 }
 
+/* ---------- Telegram: new signups are pushed to the owner's Telegram ----------
+   Setup: create a bot with @BotFather, send it any message, then
+   `npx wrangler secret put TELEGRAM_BOT_TOKEN`. The chat is linked automatically from that first message
+   (or set TELEGRAM_CHAT_ID). On linking, the bot sends the full list of existing signups once. */
+async function tg(env, method, body) {
+  const r = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${method}`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  return r.json();
+}
+async function tgChat(env) {
+  if (!env.TELEGRAM_BOT_TOKEN) return null;
+  if (env.TELEGRAM_CHAT_ID) return env.TELEGRAM_CHAT_ID;
+  const saved = await env.SUBSCRIBERS.get("tg:chat");
+  if (saved) return saved;
+  const u = await tg(env, "getUpdates", { limit: 20 });
+  const msg = (u.result || []).map(x => x.message).find(m => m && m.chat && m.chat.type === "private");
+  if (!msg) return null;
+  const chat = String(msg.chat.id);
+  await env.SUBSCRIBERS.put("tg:chat", chat);
+  // first link: say hello and send everyone who signed up so far
+  const { results } = await env.DB.prepare("SELECT email, created_at, country FROM subscribers ORDER BY created_at").all();
+  const lines = results.map((r, i) => `${i + 1}. ${r.email} · ${r.created_at.slice(0, 10)}${r.country ? " · " + r.country : ""}`);
+  await tg(env, "sendMessage", { chat_id: chat, text: `✅ Moneyflow is connected. New signups will arrive here.\n\nExisting signups (${results.length}):\n${lines.join("\n") || "none yet"}` });
+  return chat;
+}
+async function tgNotify(env, email, page, country) {
+  try {
+    const chat = await tgChat(env); if (!chat) return;
+    const { results } = await env.DB.prepare("SELECT COUNT(*) AS n FROM subscribers").all();
+    await tg(env, "sendMessage", { chat_id: chat, text: `🎉 New Moneyflow signup\n${email}\n${country ? "🌍 " + country + " · " : ""}${page || "/"}\nTotal: ${results[0].n}` });
+  } catch (e) { /* never block a signup on Telegram */ }
+}
+
 export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
@@ -114,7 +148,15 @@ export default {
       const res = await env.DB.prepare("INSERT OR IGNORE INTO subscribers (email, created_at, page, country) VALUES (?1, ?2, ?3, ?4)")
         .bind(email, new Date().toISOString(), String(body.page || "").slice(0, 200), req.cf?.country || "").run();
       const existing = res.meta.changes === 0;
+      if (!existing) ctx.waitUntil(tgNotify(env, email, String(body.page || ""), req.cf?.country || ""));
       return json({ ok: true, already: !!existing });
+    }
+
+    if (url.pathname === "/api/tg-link") {
+      const already = env.TELEGRAM_CHAT_ID || await env.SUBSCRIBERS.get("tg:chat");
+      if (already) return json({ linked: true });
+      const chat = await tgChat(env).catch(() => null);
+      return json({ linked: !!chat, hint: chat ? undefined : env.TELEGRAM_BOT_TOKEN ? "Send any message to your bot first, then retry." : "Bot token not set." });
     }
 
     if (url.pathname === "/api/prices") {
