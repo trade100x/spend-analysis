@@ -77,6 +77,9 @@ function fvBuild(k,pid,amt){
 
 /* ---------- Layout + render ---------- */
 const FV = {COL:210, W:176, ROW:38, PAD:12};
+// A 60px green band that fades toward its tail: 10 stacked segments aligned at the head
+const FV_BAND = Array.from({length:10},(_,i)=>({len:60-i*5.5, o:.14}));
+const FV_SPEED = 180;                                          // px per second, same on every line
 function fvRender(el, k, pid, amt){
   const root=fvBuild(k,pid,amt);
   const rows=[], edges=[];
@@ -95,19 +98,13 @@ function fvRender(el, k, pid, amt){
   const W=FV.PAD*2+maxDepth*FV.COL+FV.W, H=FV.PAD*2+row*FV.ROW;
   const X=d=>FV.PAD+d*FV.COL, Y=y=>FV.PAD+y*FV.ROW+FV.ROW/2;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let svg=`<svg class="fv-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">`, defs="", lines="", gi=0;
+  let svg=`<svg class="fv-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">`;
   rows.forEach(p=>p.shown.forEach(c=>{
     const x1=X(p.depth)+FV.W, y1=Y(p.y), x2=X(c.depth), y2=Y(c.y), dx=(x2-x1)/2;
     const d=`M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`;
-    const col=(CAT[c.cat]||CAT[p.cat]||{c:"#a1a1aa"}).c, id="fg"+(gi++);
-    // Same width for every line; a soft band of colour travels from parent to child
-    const vx=x2-x1, vy=y2-y1;
-    defs+=`<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">
-      <stop offset="0" stop-color="${col}" stop-opacity="0"/><stop offset=".5" stop-color="${col}" stop-opacity="1"/><stop offset="1" stop-color="${col}" stop-opacity="0"/>
-      ${reduce?"":`<animateTransform attributeName="gradientTransform" type="translate" from="${-vx} ${-vy}" to="${vx} ${vy}" dur="2.4s" begin="${(p.depth*0.4).toFixed(1)}s" repeatCount="indefinite"/>`}</linearGradient>`;
-    lines+=`<path d="${d}" class="fv-base"/><path d="${d}" class="fv-flow" stroke="${reduce?col:`url(#${id})`}"/>`;
+    // gray base line + a fixed-length green band (three stacked segments fading toward the tail)
+    svg+=`<path d="${d}" class="fv-base"/>${reduce?"":FV_BAND.map((b,i)=>`<path d="${d}" class="fv-band" data-depth="${p.depth}" data-seg="${i}" style="opacity:${b.o}"/>`).join("")}`;
   }));
-  svg+=`<defs>${defs}</defs>${lines}`;
   svg+=`</svg>`;
   const nodes=rows.map(nd=>{
     const pct=nd.usd/root.usd*100, pctTxt=pct<10?pct.toFixed(1):Math.round(pct);
@@ -123,6 +120,12 @@ function fvRender(el, k, pid, amt){
       ${canOpen?`<span class="fv-tog">${open?"−":"+"}</span>`:""}</div>`;
   }).join("");
   el.innerHTML=`<div class="fv-canvas" style="width:${W}px;height:${H}px">${svg}${nodes}</div>`;
+  el.querySelectorAll(".fv-band").forEach(path=>{
+    const len=path.getTotalLength(), seg=FV_BAND[+path.dataset.seg], travel=len+FV_BAND[0].len;
+    path.style.strokeDasharray=`${seg.len} ${travel+20}`;
+    path.animate([{strokeDashoffset:seg.len},{strokeDashoffset:seg.len-travel}],
+      {duration:travel/FV_SPEED*1000, iterations:Infinity, delay:+path.dataset.depth*350, easing:"linear"});
+  });
   el.querySelectorAll(".fv-node.fv-can").forEach(d=>d.onclick=e=>{
     if(e.target.closest(".fv-buy")) return;
     const key=d.dataset.key;
@@ -208,7 +211,7 @@ document.head.insertAdjacentHTML("beforeend",`<style>
 .fv-canvas{position:relative}
 .fv-svg{position:absolute;inset:0}
 .fv-base{fill:none;stroke:var(--line);stroke-width:2;stroke-linecap:round}
-.fv-flow{fill:none;stroke-width:2;stroke-linecap:round}
+.fv-band{fill:none;stroke:#16a34a;stroke-width:2;stroke-linecap:round}
 .fv-node{position:absolute;height:30px;display:flex;align-items:center;gap:7px;padding:0 6px 0 4px;background:var(--bg);border:1px solid var(--line);border-radius:9px;font-size:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .fv-node.fv-can{cursor:pointer}
 .fv-node.fv-can:hover{border-color:var(--muted)}
@@ -221,7 +224,7 @@ document.head.insertAdjacentHTML("beforeend",`<style>
 .fv-tog{color:var(--faint);font-size:13px;width:12px;text-align:center;flex:none}
 .fv-buy{border:0;background:var(--text);color:var(--bg);font-size:10px;font-weight:600;border-radius:6px;padding:2px 6px;cursor:pointer;flex:none}
 .fv-hint{font-size:12px;color:var(--faint);margin:8px 0 0}
-@media (prefers-reduced-motion: reduce){ .fv-flow{opacity:.5} }
+
 #buy-sheet{display:none}
 #buy-sheet.on{display:block}
 .bs-scrim{position:fixed;inset:0;background:rgba(17,17,19,.35);z-index:40}
