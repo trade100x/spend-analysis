@@ -4,3 +4,6 @@
 !.dev.vars.example
 .env*
 !.env.example
+video/.chrome/
+video/frames/
+video/stills/

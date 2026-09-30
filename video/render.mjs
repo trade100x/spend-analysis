@@ -1,0 +1,55 @@
+// Render teaser.html to MP4 frame-by-frame via Chrome DevTools Protocol.
+// Usage: node video/render.mjs [fps] [--stills 1,4,9]   (run from the repo root; needs Chrome + ffmpeg)
+import { spawn, execFileSync } from "node:child_process";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const args = process.argv.slice(2);
+const stillsArg = args.includes("--stills") ? args[args.indexOf("--stills") + 1] : null;
+const FPS = Number(args.find(a => /^\d+$/.test(a)) || 30);
+const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const PORT = 9333, frames = resolve(here, "frames");
+
+const chrome = spawn(CHROME, ["--headless=new", `--remote-debugging-port=${PORT}`, "--hide-scrollbars", "--window-size=1080,1080",
+  `--user-data-dir=${resolve(here, ".chrome")}`, "about:blank"], { stdio: "ignore" });
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+let tab;
+for (let i = 0; i < 50 && !tab; i++) { try { tab = await (await fetch(`http://127.0.0.1:${PORT}/json/new?about:blank`, { method: "PUT" })).json(); } catch { await sleep(200); } }
+const ws = new WebSocket(tab.webSocketDebuggerUrl);
+await new Promise(r => ws.addEventListener("open", r, { once: true }));
+let id = 0; const pending = new Map();
+ws.addEventListener("message", e => { const m = JSON.parse(e.data); if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); } });
+const send = (method, params = {}) => new Promise(r => { const i = ++id; pending.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
+const evaluate = async expr => (await send("Runtime.evaluate", { expression: expr, awaitPromise: true, returnByValue: true })).result?.result?.value;
+
+await send("Emulation.setDeviceMetricsOverride", { width: 1080, height: 1080, deviceScaleFactor: 1, mobile: false });
+await send("Page.enable");
+await send("Page.navigate", { url: "file://" + resolve(here, "teaser.html") + "?render" });
+await sleep(1500);
+await evaluate("document.fonts.ready.then(()=>Promise.all([...document.images].map(i=>i.complete?1:new Promise(r=>i.onload=i.onerror=r))))");
+const DURATION = await evaluate("window.DURATION");
+
+const shoot = async (t, file) => {
+  await evaluate(`renderFrame(${t})`);
+  const { result } = await send("Page.captureScreenshot", { format: "png" });
+  writeFileSync(file, Buffer.from(result.data, "base64"));
+};
+
+if (stillsArg) {
+  mkdirSync(resolve(here, "stills"), { recursive: true });
+  for (const t of stillsArg.split(",").map(Number)) await shoot(t, resolve(here, "stills", `t${t}.png`));
+  console.log("stills written");
+} else {
+  rmSync(frames, { recursive: true, force: true }); mkdirSync(frames, { recursive: true });
+  const total = Math.round(DURATION * FPS);
+  for (let f = 0; f < total; f++) { await shoot(f / FPS, resolve(frames, `f${String(f).padStart(5, "0")}.png`)); if (f % 60 === 0) process.stdout.write(`${f}/${total} `); }
+  const outFile = resolve(here, "spend-analysis-teaser.mp4");
+  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-framerate", String(FPS), "-i", resolve(frames, "f%05d.png"),
+    "-c:v", "libx264", "-preset", "slow", "-crf", "16", "-pix_fmt", "yuv420p", "-movflags", "+faststart", outFile]);
+  rmSync(frames, { recursive: true, force: true });
+  console.log("\nwrote", outFile);
+}
+ws.close(); chrome.kill();
