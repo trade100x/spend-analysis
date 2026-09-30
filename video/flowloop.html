@@ -1,0 +1,158 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* Seamless 24 s loop (1440x1080): three purchases, 8 s each. Every frame is a pure function of t. */
+:root{--bg:#f2f1ee;--soft:#e8e6e2;--surface:#faf9f7;--line:#dedad4;--text:#1a1a1a;--muted:#76726c;--faint:#a7a39c;--green:#1f9d55;--gray:#8a857e}
+*{box-sizing:border-box;margin:0}
+html,body{width:1440px;height:1080px;overflow:hidden;background:var(--bg);font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+.stage{position:relative;width:1440px;height:1080px}
+.abs{position:absolute}
+.serif{font-family:"Instrument Serif",Georgia,serif;font-weight:400;letter-spacing:-.01em}
+.scene{position:absolute;inset:0}
+.hd{position:absolute;left:64px;top:52px}
+.hd h1{font-family:"Instrument Serif",serif;font-weight:400;font-size:78px;line-height:1;letter-spacing:-.01em}
+.hd h1 i{color:var(--gray)}
+.hd p{font-size:24px;color:var(--muted);margin-top:10px}
+svg.w{position:absolute;inset:0}
+.node{position:absolute;display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:16px;padding:8px 14px 8px 10px;height:64px;width:250px;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+.node.root{border:2px solid var(--text);width:260px}
+.node .dot{width:13px;height:13px;border-radius:99px;flex:none;margin:0 6px 0 8px}
+.node b{display:block;font-size:19px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node span{display:block;font-size:16px;color:var(--muted);white-space:nowrap}
+.node.priv{background:var(--soft)}
+.logo{width:42px;height:42px;border-radius:11px;background:#fff;display:grid;place-items:center;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.04)}
+.logo img{width:64%;height:64%;object-fit:contain}
+.logo.t{color:#fff;font-weight:700;font-size:15px}
+.foot{position:absolute;left:0;right:0;bottom:36px;text-align:center;font-size:22px;color:var(--muted)}
+.foot b{color:var(--text);font-weight:600}
+.dots{position:absolute;right:64px;top:70px;display:flex;gap:10px}
+.dots i{width:10px;height:10px;border-radius:99px;background:var(--line)}
+</style></head>
+<body><div class="stage" id="stage"></div>
+<script>
+const img = n => `<div class="logo"><img src="logos/${n}.png"></div>`;
+const tile = (t,bg) => `<div class="logo t" style="background:${bg}">${t}</div>`;
+const LG = {
+  openai:img("openai"), nvidia:img("nvidia"), tsmc:tile("T","#d7282f"), amd:tile("A","#111"), skhynix:tile("SK","#e4002b"), micron:img("micron"),
+  vertiv:img("vertiv"), gev:img("gevernova"), asml:img("asml"), tel:tile("TEL","#1d3b72"), netflix:img("netflix"), sony:img("sony"), wbd:img("wbd"),
+  comcast:tile("C","#1f2a44"), google:img("google"), meta:img("meta"), ttd:img("thetradedesk"), amazon:img("amazon"), cisco:tile("C","#049fd9"),
+  arista:img("arista"), corning:tile("C","#0a4d8c"), apple:img("apple"), samsung:img("samsung"), lgd:img("lgdisplay"), foxconn:img("foxconn"), tmobile:img("tmobile"),
+};
+const COL=[64,364,664,964,1164];   // x of each column (col 4 only used for the deepest step)
+// Each purchase: header + nodes. y = centre; t = appear time within the 8 s scene; p = parent id.
+const SCENES = [
+  { head:"Where your <i>$20</i> goes.", sub:"ChatGPT Plus · monthly", nodes:[
+    {id:"r",c:0,y:560,t:.5,title:"ChatGPT Plus",sub:"$20.00",logo:LG.openai,root:1},
+    {id:"cloud",c:1,y:420,t:1.0,title:"Cloud compute",sub:"$8.40",dot:"#4f7cff",p:"r"},
+    {id:"keep",c:1,y:720,t:1.15,title:"Kept by OpenAI",sub:"$6.80 · private",dot:"#7c5cff",p:"r",priv:1},
+    {id:"talent",c:1,y:810,t:1.3,title:"Research talent",sub:"$3.60",dot:"#94a3b8",p:"r",priv:1},
+    {id:"apps",c:1,y:900,t:1.45,title:"App stores & cards",sub:"$1.20",dot:"#ec4899",p:"r"},
+    {id:"chips",c:2,y:290,t:1.7,title:"AI chips",sub:"$3.78",dot:"#22c55e",p:"cloud"},
+    {id:"mem",c:2,y:470,t:1.85,title:"HBM memory",sub:"$0.94",dot:"#06b6d4",p:"cloud"},
+    {id:"pow",c:2,y:620,t:2.0,title:"Power & cooling",sub:"$1.51",dot:"#f59e0b",p:"cloud"},
+    {id:"nvda",c:3,y:220,t:2.4,title:"NVIDIA",sub:"$0.50",logo:LG.nvidia,p:"chips",w:190},
+    {id:"tsmc",c:3,y:290,t:2.5,title:"TSMC",sub:"$0.93",logo:LG.tsmc,p:"chips",w:180},
+    {id:"amd",c:3,y:360,t:2.6,title:"AMD",sub:"$0.50",logo:LG.amd,p:"chips",w:190},
+    {id:"skh",c:3,y:440,t:2.8,title:"SK hynix",sub:"$0.32",logo:LG.skhynix,p:"mem"},
+    {id:"mu",c:3,y:510,t:2.9,title:"Micron",sub:"$0.32",logo:LG.micron,p:"mem"},
+    {id:"vrt",c:3,y:590,t:3.1,title:"Vertiv",sub:"$0.24",logo:LG.vertiv,p:"pow"},
+    {id:"gev",c:3,y:660,t:3.2,title:"GE Vernova",sub:"$0.24",logo:LG.gev,p:"pow"},
+    {id:"asml",c:4,y:220,t:3.5,title:"ASML",sub:"$0.10",logo:LG.asml,p:"tsmc",x:1200},
+    {id:"tel",c:4,y:360,t:3.6,title:"Tokyo Electron",sub:"$0.10",logo:LG.tel,p:"tsmc",x:1200},
+  ]},
+  { head:"Where your <i>$17.99</i> goes.", sub:"Netflix Standard · monthly", nodes:[
+    {id:"r",c:0,y:560,t:.5,title:"Netflix Standard",sub:"$17.99",logo:LG.netflix,root:1},
+    {id:"content",c:1,y:290,t:1.0,title:"Shows & films",sub:"$9.89",dot:"#e11d48",p:"r"},
+    {id:"mkt",c:1,y:520,t:1.15,title:"Marketing & ads",sub:"$2.16",dot:"#f97316",p:"r"},
+    {id:"cloud",c:1,y:720,t:1.3,title:"Streaming & cloud",sub:"$1.44",dot:"#4f7cff",p:"r"},
+    {id:"keep",c:1,y:880,t:1.45,title:"Kept by Netflix",sub:"$1.98 · NFLX",logo:LG.netflix,p:"r"},
+    {id:"sony",c:2,y:220,t:1.8,title:"Sony",sub:"$2.31",logo:LG.sony,p:"content"},
+    {id:"wbd",c:2,y:290,t:1.9,title:"Warner Bros.",sub:"$2.31",logo:LG.wbd,p:"content"},
+    {id:"cmcsa",c:2,y:360,t:2.0,title:"Comcast",sub:"$2.31",logo:LG.comcast,p:"content"},
+    {id:"goog",c:2,y:450,t:2.2,title:"Google",sub:"$0.65",logo:LG.google,p:"mkt"},
+    {id:"meta",c:2,y:520,t:2.3,title:"Meta",sub:"$0.65",logo:LG.meta,p:"mkt"},
+    {id:"ttd",c:2,y:590,t:2.4,title:"The Trade Desk",sub:"$0.65",logo:LG.ttd,p:"mkt"},
+    {id:"aws",c:2,y:690,t:2.6,title:"Amazon (AWS)",sub:"$0.86",logo:LG.amazon,p:"cloud"},
+    {id:"net",c:2,y:770,t:2.75,title:"Network hardware",sub:"$0.58",dot:"#0ea5e9",p:"cloud"},
+    {id:"csco",c:3,y:700,t:3.1,title:"Cisco",sub:"$0.19",logo:LG.cisco,p:"net"},
+    {id:"anet",c:3,y:770,t:3.2,title:"Arista",sub:"$0.19",logo:LG.arista,p:"net"},
+    {id:"glw",c:3,y:840,t:3.3,title:"Corning",sub:"$0.19",logo:LG.corning,p:"net"},
+  ]},
+  { head:"Where your <i>$999</i> goes.", sub:"iPhone · one-off purchase", nodes:[
+    {id:"r",c:0,y:560,t:.5,title:"iPhone",sub:"$999",logo:LG.apple,root:1},
+    {id:"keep",c:1,y:250,t:1.0,title:"Kept by Apple",sub:"$339.66 · AAPL",logo:LG.apple,p:"r"},
+    {id:"comp",c:1,y:560,t:1.15,title:"Components",sub:"$449.55",dot:"#0891b2",p:"r"},
+    {id:"retail",c:1,y:790,t:1.3,title:"Carriers & retail",sub:"$79.92",dot:"#8b5cf6",p:"r"},
+    {id:"fox",c:1,y:880,t:1.45,title:"Foxconn",sub:"$31.97 · assembly",logo:LG.foxconn,p:"r"},
+    {id:"chip",c:2,y:330,t:1.8,title:"Apple chips",sub:"$107.89",dot:"#14b8a6",p:"comp"},
+    {id:"disp",c:2,y:480,t:1.95,title:"OLED display",sub:"$76.42",dot:"#0891b2",p:"comp"},
+    {id:"mem",c:2,y:630,t:2.1,title:"Memory",sub:"$62.94",dot:"#06b6d4",p:"comp"},
+    {id:"cam",c:2,y:760,t:2.25,title:"Cameras",sub:"$53.95",dot:"#0891b2",p:"comp"},
+    {id:"tsmc",c:3,y:330,t:2.6,title:"TSMC",sub:"$86.31",logo:LG.tsmc,p:"chip",w:180},
+    {id:"sam",c:3,y:445,t:2.8,title:"Samsung",sub:"$22.93",logo:LG.samsung,p:"disp"},
+    {id:"lgd",c:3,y:515,t:2.9,title:"LG Display",sub:"$22.93",logo:LG.lgd,p:"disp"},
+    {id:"skh",c:3,y:595,t:3.05,title:"SK hynix",sub:"$20.98",logo:LG.skhynix,p:"mem"},
+    {id:"mu",c:3,y:665,t:3.15,title:"Micron",sub:"$20.98",logo:LG.micron,p:"mem"},
+    {id:"sony",c:3,y:760,t:3.3,title:"Sony",sub:"$16.18",logo:LG.sony,p:"cam"},
+    {id:"asml",c:4,y:280,t:3.5,title:"ASML",sub:"$5.39",logo:LG.asml,p:"tsmc",x:1200},
+    {id:"tel",c:4,y:380,t:3.6,title:"Tokyo Electron",sub:"$5.39",logo:LG.tel,p:"tsmc",x:1200},
+  ]},
+];
+const SLEN=8, DURATION=SCENES.length*SLEN;
+window.DURATION=DURATION;
+const NH=64;
+const X=n=>n.x ?? COL[n.c], W=n=>n.w ?? (n.root?260:250);
+
+/* ---------- build DOM once ---------- */
+const S=document.getElementById("stage");
+S.innerHTML = SCENES.map((sc,si)=>`<div class="scene" id="sc${si}">
+    <div class="hd"><h1>${sc.head}</h1><p>${sc.sub}</p></div>
+    <svg class="w" id="w${si}" width="1440" height="1080"></svg>
+    ${sc.nodes.map(n=>`<div class="node ${n.root?"root":""} ${n.priv?"priv":""}" id="n${si}_${n.id}" style="left:${X(n)}px;top:${n.y-NH/2}px;width:${W(n)}px">
+      ${n.logo?n.logo:`<span class="dot" style="background:${n.dot}"></span>`}<div style="min-width:0"><b>${n.title}</b><span>${n.sub}</span></div></div>`).join("")}
+  </div>`).join("") + `<div class="dots">${SCENES.map((_,i)=>`<i id="dot${i}"></i>`).join("")}</div>
+  <div class="foot">Try it with your own spending · <b>moneyflow.crazyidea.fun</b></div>`;
+
+const wires=[];
+SCENES.forEach((sc,si)=>{
+  const by=Object.fromEntries(sc.nodes.map(n=>[n.id,n])), svg=document.getElementById("w"+si);
+  sc.nodes.filter(n=>n.p).forEach(n=>{
+    const p=by[n.p], x1=X(p)+W(p), y1=p.y, x2=X(n), y2=n.y, dx=(x2-x1)/2;
+    const d=`M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`;
+    svg.insertAdjacentHTML("beforeend",`<path d="${d}" fill="none" stroke="#dedad4" stroke-width="2.5" stroke-linecap="round"/>`);
+    const base=svg.lastChild, segs=[];
+    for(let i=0;i<6;i++){ svg.insertAdjacentHTML("beforeend",`<path d="${d}" fill="none" stroke="#1f9d55" stroke-width="2.5" stroke-linecap="round" opacity="0"/>`); segs.push(svg.lastChild); }
+    wires.push({si,n,p,base,segs,len:base.getTotalLength()});
+  });
+});
+
+/* ---------- animation ---------- */
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const out=x=>{x=clamp(x);return 1-Math.pow(1-x,3);};
+const ease=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;};
+const prog=(t,a,b)=>clamp((t-a)/(b-a));
+const set=(el,o,tr="")=>{el.style.opacity=o;el.style.transform=tr;};
+
+function renderFrame(T){
+  T=((T%DURATION)+DURATION)%DURATION;                       // loop-safe
+  SCENES.forEach((sc,si)=>{
+    const t=T-si*SLEN;                                         // local time in this scene
+    const vis=(t>=0&&t<SLEN) ? Math.min(out(prog(t,0,.5)),1-ease(prog(t,SLEN-.7,SLEN))) : 0;
+    const el=document.getElementById("sc"+si); el.style.opacity=vis; el.style.visibility=vis>0?"visible":"hidden";
+    document.getElementById("dot"+si).style.background = (t>=0&&t<SLEN) ? "#1a1a1a" : "#dedad4";
+    if(!vis) return;
+    const hd=el.querySelector(".hd"); set(hd,out(prog(t,.1,.6)),`translateY(${(1-out(prog(t,.1,.6)))*16}px)`);
+    sc.nodes.forEach(n=>{ const k=out(prog(t,n.t,n.t+.4)); set(document.getElementById(`n${si}_${n.id}`),k,`translateX(${(1-k)*-18}px) scale(${.95+.05*k})`); });
+  });
+  wires.forEach(w=>{
+    const t=T-w.si*SLEN; if(t<0||t>=SLEN) return;
+    const drawn=ease(prog(t,w.p.t+.2,w.n.t));
+    w.base.style.strokeDasharray=w.len; w.base.style.strokeDashoffset=w.len*(1-drawn);
+    const band=64, speed=240, travel=w.len+band, head=Math.max(0,t-w.n.t)*speed%travel;
+    w.segs.forEach((s,i)=>{ const L=band-i*10; s.style.strokeDasharray=`${L} ${travel+40}`; s.style.strokeDashoffset=L-head; s.style.opacity=t>w.n.t?.2:0; });
+  });
+}
+window.renderFrame=renderFrame;
+if(!location.search.includes("render")){ const t0=performance.now(); const loop=()=>{ renderFrame((performance.now()-t0)/1000); requestAnimationFrame(loop); }; document.fonts.ready.then(loop); }
+</script></body></html>
