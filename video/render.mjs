@@ -12,7 +12,7 @@ const FPS = Number(args.find(a => /^\d+$/.test(a)) || 30);
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const PORT = 9333, frames = resolve(here, "frames");
 
-const chrome = spawn(CHROME, ["--headless=new", `--remote-debugging-port=${PORT}`, "--hide-scrollbars", "--window-size=1080,1080",
+const chrome = spawn(CHROME, ["--headless=new", `--remote-debugging-port=${PORT}`, "--hide-scrollbars", "--window-size=1440,1080",
   `--user-data-dir=${resolve(here, ".chrome")}`, "about:blank"], { stdio: "ignore" });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -25,7 +25,7 @@ ws.addEventListener("message", e => { const m = JSON.parse(e.data); if (m.id && 
 const send = (method, params = {}) => new Promise(r => { const i = ++id; pending.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
 const evaluate = async expr => (await send("Runtime.evaluate", { expression: expr, awaitPromise: true, returnByValue: true })).result?.result?.value;
 
-await send("Emulation.setDeviceMetricsOverride", { width: 1080, height: 1080, deviceScaleFactor: 1, mobile: false });
+await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 1080, deviceScaleFactor: 1, mobile: false });
 await send("Page.enable");
 await send("Page.navigate", { url: "file://" + resolve(here, "teaser.html") + "?render" });
 await sleep(1500);

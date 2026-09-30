@@ -1,10 +1,10 @@
-"""Original soundtrack for the teaser: 28 s, 120 BPM (1 bar = 2 s), warm product-video style.
+"""Original soundtrack for the teaser: 30 s, 120 BPM (1 bar = 2 s), warm product-video style.
 Synthesized from scratch (no samples), so it's royalty-free. Writes video/music.wav.
-Structure follows the video: intro 0-6 s, groove 6-14, breakdown + riser 14-18, full drop 18-25, outro chord 25-28."""
+Structure follows the video: intro 0-6 s, groove 6-14, breakdown + riser 14-18, drop 18-24 (tokens + Solana), portfolio 24-27, outro 27-30."""
 import numpy as np, wave, os
 
 SR = 44100
-DUR = 28.0
+DUR = 30.0
 N = int(SR * DUR)
 t_all = np.arange(N) / SR
 BEAT = 0.5          # 120 BPM
@@ -40,23 +40,23 @@ bar_chord = lambda b: CHORDS[b % 4]
 pad = np.zeros(N); pluck = np.zeros(N); bass = np.zeros(N); drums = np.zeros(N); fx = np.zeros(N)
 
 # ---------- pad: detuned soft saws, lowpassed ----------
-for b in range(14):
+for b in range(15):
     start, length = b * 2.0, 2.3
     n = int(length * SR); tt = np.arange(n) / SR
-    chord = bar_chord(b) if b < 13 else [53, 57, 60, 64, 67, 72]
+    chord = bar_chord(b) if b < 14 else [53, 57, 60, 64, 67, 72]
     sig = np.zeros(n)
     for m in chord:
         for det in (-0.08, 0.0, 0.08):                      # ~8 cents detune for width
             f = note(m + det)
             sig += (2 * ((tt * f) % 1) - 1) * 0.5 + np.sin(2 * np.pi * f * tt)
-    level = 0.55 if b < 3 else 0.45 if b < 12 else 0.6
+    level = 0.55 if b < 3 else 0.45 if b < 13 else 0.6
     sig *= env_adsr(n, 0.35, 0.3, 0.85, 0.5, 1.9) * level / len(chord)
     add(pad, sig, start)
 pad = fft_filter(pad, lo=90, hi=1800)
 
 # ---------- pluck arpeggio: bell-ish decaying sines, 8th notes ----------
 ARP = [0, 2, 1, 3, 2, 4, 3, 2]
-for b in range(13):
+for b in range(14):
     chord = bar_chord(b)
     up = 12 if 9 <= b <= 11 else 0                          # octave up for the Solana drop
     for k in range(8):
@@ -69,10 +69,10 @@ for b in range(13):
         add(pluck, s * vel, tstart)
 
 # ---------- sub bass: root notes from the groove onward ----------
-for b in range(3, 13):
+for b in range(3, 14):
     if b in (7, 8): continue                                # breakdown: no bass
     root = bar_chord(b)[0] - 12
-    for beat in ((0, 0.9), (1.5, 0.45)) if b < 9 else ((0, 0.45), (0.5, 0.45), (1.0, 0.45), (1.5, 0.45)):
+    for beat in ((0, 0.45), (0.5, 0.45), (1.0, 0.45), (1.5, 0.45)) if 9 <= b <= 11 else ((0, 0.9), (1.5, 0.45)):
         n = int(beat[1] * SR); tt = np.arange(n) / SR; f = note(root)
         s = np.sin(2 * np.pi * f * tt) * env_adsr(n, 0.01, 0.1, 0.8, 0.12, beat[1] - 0.12)
         add(bass, s * 0.42, b * 2.0 + beat[0])
@@ -90,13 +90,13 @@ def hat(length=0.05):
     return fft_filter(rng.standard_normal(n), lo=7000) * np.exp(-tt * 70)
 
 K, C = kick(), clap()
-for b in range(3, 13):
+for b in range(3, 14):
     for q in range(4):
         tq = b * 2.0 + q * BEAT
         if b in (7, 8):                                     # breakdown: only a heartbeat kick on 1
             if q == 0: add(drums, K * 0.5, tq)
             continue
-        if b < 9:                                           # groove: soft kick on 1 & 3, shaker
+        if not 9 <= b <= 11:                                # groove: soft kick on 1 & 3, shaker
             if q in (0, 2): add(drums, K * 0.7, tq)
         else:                                               # drop: four on the floor + claps
             add(drums, K * 0.85, tq)
@@ -123,10 +123,12 @@ add(fx, swell(3.6, 0.35), 14.4)            # riser through the breakdown into th
 riser_n = int(3.6 * SR); rt = np.arange(riser_n) / SR
 add(fx, np.sin(2 * np.pi * np.cumsum(200 + 900 * (rt / 3.6) ** 2) / SR) * (rt / 3.6) ** 2 * 0.06, 14.4)
 add(fx, impact() * 0.55, 18.0)             # Solana drop
-add(fx, swell(0.8, 0.15), 21.1)            # into "what if you invested it instead?"
-sparkle(24.35, [84, 88, 91, 96])           # the +95% landing
-add(fx, swell(0.9, 0.18), 24.4)            # into the end card
-add(fx, impact() * 0.35, 25.3)
+add(fx, swell(0.8, 0.16), 21.1)            # into "Made possible by Solana"
+add(fx, impact() * 0.32, 21.9)
+add(fx, swell(0.8, 0.14), 23.3)            # into the portfolio scene
+sparkle(26.35, [84, 88, 91, 96])           # the +95% landing
+add(fx, swell(0.9, 0.18), 26.4)            # into the end card
+add(fx, impact() * 0.35, 27.3)
 
 # ---------- reverb (convolution with a decaying noise tail) ----------
 def reverb(x, secs=2.2, seed=1):

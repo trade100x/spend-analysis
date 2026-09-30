@@ -4,10 +4,10 @@
 <style>
 /* 1080x1080 teaser, rendered frame-by-frame: every frame is a pure function of time t (seconds) */
 :root{--bg:#f2f1ee;--soft:#e8e6e2;--surface:#faf9f7;--line:#dedad4;--text:#1a1a1a;--muted:#76726c;--faint:#a7a39c;--green:#1f9d55;
-  --accent:linear-gradient(135deg,#ffc46b 0%,#ff8a4c 55%,#ff5f45 100%);--sol:linear-gradient(135deg,#9945ff 0%,#14f195 100%)}
+  --accent:#8a857e;--sol:linear-gradient(135deg,#9945ff 0%,#14f195 100%)}
 *{box-sizing:border-box;margin:0}
-html,body{width:1080px;height:1080px;overflow:hidden;background:var(--bg);font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
-.stage{position:relative;width:1080px;height:1080px}
+html,body{width:1440px;height:1080px;overflow:hidden;background:var(--bg);font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+.stage{position:relative;width:1440px;height:1080px}
 .abs{position:absolute}
 .serif{font-family:"Instrument Serif",Georgia,serif;font-weight:400;letter-spacing:-.01em}
 .center{left:0;right:0;text-align:center}
@@ -16,14 +16,14 @@ html,body{width:1080px;height:1080px;overflow:hidden;background:var(--bg);font-f
 .logo img{width:62%;height:62%;object-fit:contain}
 .logo.t{color:#fff;font-weight:700;font-size:26px}
 /* receipt */
-#receipt{left:340px;top:250px;width:400px;background:var(--surface);border-radius:32px;padding:34px;box-shadow:0 30px 60px -30px rgba(0,0,0,.18)}
+#receipt{left:520px;top:250px;width:400px;background:var(--surface);border-radius:32px;padding:34px;box-shadow:0 30px 60px -30px rgba(0,0,0,.18)}
 #receipt .row{display:flex;align-items:center;gap:18px}
 #receipt .amt{font-size:100px;margin-top:18px;line-height:1}
 #receipt small{display:block;font-size:22px;color:var(--muted)}
 #receipt b{font-size:28px;font-weight:600}
 /* tree */
 svg#wires{position:absolute;inset:0}
-.node{position:absolute;display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:18px;padding:10px 14px;box-shadow:0 1px 0 rgba(0,0,0,.03);width:236px;height:74px}
+.node{position:absolute;display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:18px;padding:10px 14px;box-shadow:0 1px 0 rgba(0,0,0,.03);width:268px;height:74px}
 .node .dot{width:14px;height:14px;border-radius:99px;flex:none;margin:0 4px}
 .node .logo{width:46px;height:46px;border-radius:12px}
 .node .logo.t{font-size:18px}
@@ -46,7 +46,7 @@ const L = n => `logos/${n}.png`;
 const tile = (txt,bg) => `<div class="logo t" style="background:${bg}">${txt}</div>`;
 const img  = n => `<div class="logo"><img src="${L(n)}"></div>`;
 const LOGO = {openai:img("openai"), nvidia:img("nvidia"), tsmc:tile("T","#d7282f"), amd:tile("A","#111"), skhynix:tile("SK","#e4002b"),
-  micron:img("micron"), vertiv:img("vertiv"), gev:img("gevernova"), asml:img("asml"), msft:img("microsoft"), sol:img("solana")};
+  micron:img("micron"), vertiv:img("vertiv"), gev:img("gevernova"), asml:img("asml"), msft:img("microsoft"), sol:img("solana"), tel:tile("TEL","#1d3b72")};
 
 /* ---------- timing helpers ---------- */
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
@@ -58,7 +58,7 @@ const win=(t,a,b,f=.45)=>Math.min(out(prog(t,a,a+f)), 1-ease(prog(t,b-f,b)));
 const money=v=>"$"+v.toFixed(2);
 
 /* ---------- tree layout (1080 square) ---------- */
-const COL=[36,296,556,816], NW=236, NH=74;
+const COL=[34,306,578,850,1122], NW=268, NH=74;
 const N = [
   {id:"root", c:0, y:500, t:5.9, title:"ChatGPT Plus", sub:"$20.00 · 100%", logo:LOGO.openai, root:true},
   {id:"cloud",c:1, y:500, t:6.6, title:"Cloud compute", sub:"$8.40 · 42%", dot:"#4f7cff", p:"root"},
@@ -72,6 +72,8 @@ const N = [
   {id:"mu",   c:3, y:545, t:9.5, title:"Micron", sub:"MU · $0.32", logo:LOGO.micron, p:"mem"},
   {id:"vrt",  c:3, y:705, t:9.8, title:"Vertiv", sub:"VRT · $0.24", logo:LOGO.vertiv, p:"power"},
   {id:"gev",  c:3, y:795, t:10.0,title:"GE Vernova", sub:"GEV · $0.24", logo:LOGO.gev, p:"power"},
+  {id:"asml", c:4, y:210, t:10.5,title:"ASML", sub:"ASML · $0.10", logo:LOGO.asml, p:"tsmc"},
+  {id:"tel",  c:4, y:295, t:10.7,title:"Tokyo Electron", sub:"8035.T · $0.10", logo:LOGO.tel, p:"tsmc"},
 ];
 const byId=Object.fromEntries(N.map(n=>[n.id,n]));
 const nx=n=>COL[n.c], ny=n=>n.y-NH/2;
@@ -87,14 +89,14 @@ S.innerHTML = `
     <div id="s1h" class="abs center serif" style="top:700px;font-size:76px;line-height:1.1">Every month, you pay<br>$20 for ChatGPT.</div>
   </div>
   <!-- scene 2: the question -->
-  <div id="s2" class="abs center serif" style="top:390px;font-size:101px;line-height:1.05">Ever wondered where<br>that $20 <span style="font-style:italic;background:var(--accent);-webkit-background-clip:text;color:transparent;padding-right:.08em">actually goes?</span></div>
+  <div id="s2" class="abs center serif" style="top:390px;font-size:101px;line-height:1.05">Ever wondered where<br>that $20 <span style="font-style:italic;color:var(--accent)">actually goes?</span></div>
   <!-- scene 3: the flow -->
   <div id="s3" class="abs" style="inset:0">
     <div id="s3h" class="abs center serif" style="top:40px;font-size:55px">Follow your $20.</div>
-    <svg id="wires" width="1080" height="1080"></svg>
+    <svg id="wires" width="1440" height="1080"></svg>
     ${N.map(n=>`<div class="node ${n.root?"root":""}" id="n_${n.id}" style="left:${nx(n)}px;top:${ny(n)}px">
       ${n.logo?n.logo:`<span class="dot" style="background:${n.dot}"></span>`}<div style="min-width:0"><b>${n.title}</b><span>${n.sub}</span></div></div>`).join("")}
-    <div id="s3c" class="abs center" style="top:930px;font-size:28px;color:var(--muted)">…all the way down to ${`<b style="color:var(--text)">ASML</b>`} in the Netherlands and <b style="color:var(--text)">Tokyo Electron</b> in Japan.</div>
+    <div id="s3c" class="abs center" style="top:930px;font-size:28px;color:var(--muted)">From your AI app to chips made in <b style="color:var(--text)">Taiwan</b> and machines built in the <b style="color:var(--text)">Netherlands</b> and <b style="color:var(--text)">Japan</b>.</div>
   </div>
   <!-- scene 4: the realization -->
   <div id="s4" class="abs" style="inset:0">
@@ -108,16 +110,22 @@ S.innerHTML = `
   <div id="s5" class="abs" style="inset:0">
     <div id="s5h" class="abs center serif" style="top:120px;font-size:97px;line-height:1.05">Now you can<br>own them.</div>
     <div id="s5s" class="abs center" style="top:350px;font-size:32px;color:var(--muted)">Tokenized stocks, onchain and 24/7 on <b style="background:var(--sol);-webkit-background-clip:text;color:transparent">Solana</b>.</div>
-    <div id="solmark" class="abs" style="left:476px;top:560px;width:128px;height:128px;border-radius:36px;background:#fff;display:grid;place-items:center;box-shadow:0 30px 60px -20px rgba(153,69,255,.55)"><img src="logos/solana.png" style="width:76px;height:76px;object-fit:contain"></div>
-    ${[["NVDAx",LOGO.nvidia,"NVIDIA",200,470],["TSMx",LOGO.tsmc,"TSMC",690,470],["MUx",LOGO.micron,"Micron",120,640],["AMDx",LOGO.amd,"AMD",720,640],
-       ["VRTx",LOGO.vertiv,"Vertiv",210,810],["ASMLx",LOGO.asml,"ASML",650,810],["OPENAI",LOGO.openai,"pre-IPO",395,905]]
+    <div id="solmark" class="abs" style="left:656px;top:560px;width:128px;height:128px;border-radius:36px;background:#fff;display:grid;place-items:center;box-shadow:0 30px 60px -20px rgba(153,69,255,.55)"><img src="logos/solana.png" style="width:76px;height:76px;object-fit:contain"></div>
+    ${[["NVDAx",LOGO.nvidia,"NVIDIA",330,470],["TSMx",LOGO.tsmc,"TSMC",880,470],["MUx",LOGO.micron,"Micron",210,640],["AMDx",LOGO.amd,"AMD",930,640],
+       ["VRTx",LOGO.vertiv,"Vertiv",330,810],["ASMLx",LOGO.asml,"ASML",860,810],["OPENAI",LOGO.openai,"pre-IPO",585,905]]
       .map(([s,l,n,x,y],i)=>`<div class="tok" id="tk${i}" style="left:${x}px;top:${y}px">${l}${s} <i>${n}</i></div>`).join("")}
+  </div>
+  <!-- scene 5b: made possible by Solana -->
+  <div id="s5b" class="abs" style="inset:0">
+    <div id="s5bg" class="abs" style="left:420px;top:150px;width:600px;height:600px;border-radius:50%;background:radial-gradient(closest-side,rgba(153,69,255,.28),rgba(20,241,149,.14) 55%,transparent 75%)"></div>
+    <div id="s5bl" class="abs" style="left:620px;top:250px;width:200px;height:200px;border-radius:52px;background:#fff;display:grid;place-items:center;box-shadow:0 40px 80px -30px rgba(153,69,255,.55)"><img src="logos/solana.png" style="width:120px;height:120px;object-fit:contain"></div>
+    <div id="s5bt" class="abs center serif" style="top:560px;font-size:110px;line-height:1">Made possible by <span style="background:var(--sol);-webkit-background-clip:text;color:transparent;padding-right:.06em">Solana</span>.</div>
   </div>
   <!-- scene 6: the turn -->
   <div id="s6" class="abs" style="inset:0">
-    <div id="s6h" class="abs center serif" style="top:130px;font-size:74px;line-height:1.1">What if you invested<br>it instead?</div>
-    <div id="s6card" class="abs card" style="left:150px;top:390px;width:780px">
-      <div style="font-size:24px;color:var(--muted)">Your ChatGPT money, invested in the companies behind it · last 2 years</div>
+    <div id="s6h" class="abs center serif" style="top:130px;font-size:74px;line-height:1.1">What if your spending<br>also built a portfolio?</div>
+    <div id="s6card" class="abs card" style="left:330px;top:400px;width:780px">
+      <div style="font-size:24px;color:var(--muted)">Invest $20 a month alongside your ChatGPT plan, into the companies behind it · last 2 years</div>
       <div style="display:flex;align-items:baseline;gap:26px;margin-top:22px"><span class="serif" style="font-size:69px;color:var(--faint)">$480</span><span style="font-size:51px;color:var(--faint)">→</span><span class="serif" id="s6v" style="font-size:124px">$480</span></div>
       <div id="s6p" style="font-size:38px;font-weight:600;color:var(--green);margin-top:6px">+0%</div>
       <div class="bar" style="background:var(--soft);margin-top:26px"><div id="s6b" class="bar" style="background:var(--green);width:0%"></div></div>
@@ -127,10 +135,10 @@ S.innerHTML = `
   </div>
   <!-- scene 7: call to action -->
   <div id="s7" class="abs" style="inset:0">
-    <div class="abs" style="left:0;right:0;top:0;height:14px;background:var(--accent)"></div>
+    <div class="abs" style="left:0;right:0;top:0;height:14px;background:linear-gradient(90deg,#d9d5cf,#a9a49c,#d9d5cf)"></div>
     <div id="s7h" class="abs center serif" style="top:300px;font-size:110px;line-height:1.02">Where does your<br>money really go?</div>
     <div id="s7s" class="abs center" style="top:575px;font-size:32px;color:var(--muted)">Pick what you spend on. See who you fund. Invest smarter.</div>
-    <div id="s7u" class="abs center" style="top:700px"><span class="pill" style="background:var(--text);color:#fff;font-size:30px;padding:18px 34px">spend-analysis.madmarketagents.workers.dev</span></div>
+    <div id="s7u" class="abs center" style="top:700px"><span class="pill" style="background:var(--text);color:#fff;font-size:30px;padding:18px 34px">moneyflow.crazyidea.fun</span></div>
     <div id="s7b" class="abs center" style="top:900px;font-size:24px;color:var(--faint)">Free · works for any brand, any country</div>
   </div>`;
 
@@ -184,22 +192,27 @@ function renderFrame(t){
   set($("s5s"),out(prog(t,18.7,19.2)));
   const sm=out(prog(t,19.0,19.6)); set($("solmark"),sm,`scale(${.6+.4*sm}) rotate(${(1-sm)*-20}deg)`);
   for(let i=0;i<7;i++){ const k=out(prog(t,19.4+i*.18,19.9+i*.18)); const fy=Math.sin((t+i)*1.6)*4; set($("tk"+i),k,`translateY(${(1-k)*24+fy}px) scale(${.85+.15*k})`); }
-  // scene 6 (21.8 - 25.2)
-  set($("s6"),win(t,21.9,25.3));
-  set($("s6h"),out(prog(t,22.0,22.6)),`translateY(${(1-out(prog(t,22.0,22.6)))*20}px)`);
-  const c=out(prog(t,22.5,23.1)); set($("s6card"),c,`translateY(${(1-c)*30}px)`);
-  const g=ease(prog(t,23.0,24.4)); $("s6v").textContent="$"+Math.round(480+457*g); $("s6p").textContent="+"+Math.round(95*g)+"%"; $("s6b").style.width=(51+49*g)+"%";
-  set($("s6c"),out(prog(t,24.2,24.7)));
-  set($("s6d"),out(prog(t,23.8,24.3)));
-  // scene 7 (25.2 - 28)
-  set($("s7"),out(prog(t,25.3,25.8)));
-  set($("s7h"),out(prog(t,25.4,26.0)),`translateY(${(1-out(prog(t,25.4,26.0)))*24}px)`);
-  set($("s7s"),out(prog(t,25.9,26.4)));
-  const u=out(prog(t,26.3,26.8)); set($("s7u"),u,`scale(${.94+.06*u})`);
-  set($("s7b"),out(prog(t,26.8,27.2)));
+  // scene 5b (21.9 - 24.1): made possible by Solana
+  set($("s5b"),win(t,21.9,24.2,.4));
+  const lb=out(prog(t,22.0,22.6)); set($("s5bl"),lb,`scale(${.7+.3*lb})`);
+  set($("s5bg"),out(prog(t,22.0,22.9)),`scale(${.8+.2*out(prog(t,22.0,23.4))})`);
+  set($("s5bt"),out(prog(t,22.4,23.0)),`translateY(${(1-out(prog(t,22.4,23.0)))*24}px)`);
+  // scene 6 (24.1 - 27.3)
+  set($("s6"),win(t,24.1,27.4));
+  set($("s6h"),out(prog(t,24.2,24.8)),`translateY(${(1-out(prog(t,24.2,24.8)))*20}px)`);
+  const c=out(prog(t,24.6,25.2)); set($("s6card"),c,`translateY(${(1-c)*30}px)`);
+  const g=ease(prog(t,25.1,26.4)); $("s6v").textContent="$"+Math.round(480+457*g); $("s6p").textContent="+"+Math.round(95*g)+"%"; $("s6b").style.width=(51+49*g)+"%";
+  set($("s6c"),out(prog(t,26.2,26.7)));
+  set($("s6d"),out(prog(t,25.8,26.3)));
+  // scene 7 (27.3 - 30)
+  set($("s7"),out(prog(t,27.3,27.8)));
+  set($("s7h"),out(prog(t,27.4,28.0)),`translateY(${(1-out(prog(t,27.4,28.0)))*24}px)`);
+  set($("s7s"),out(prog(t,27.9,28.4)));
+  const u=out(prog(t,28.3,28.8)); set($("s7u"),u,`scale(${.94+.06*u})`);
+  set($("s7b"),out(prog(t,28.8,29.2)));
 }
 window.renderFrame=renderFrame;
-window.DURATION=28;
+window.DURATION=30;
 // live preview when opened directly in a browser
 if(!location.search.includes("render")){ const t0=performance.now(); const loop=()=>{ renderFrame(((performance.now()-t0)/1000)%DURATION); requestAnimationFrame(loop); }; document.fonts.ready.then(loop); }
 </script></body></html>
