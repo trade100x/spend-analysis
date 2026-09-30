@@ -95,20 +95,19 @@ function fvRender(el, k, pid, amt){
   const W=FV.PAD*2+maxDepth*FV.COL+FV.W, H=FV.PAD*2+row*FV.ROW;
   const X=d=>FV.PAD+d*FV.COL, Y=y=>FV.PAD+y*FV.ROW+FV.ROW/2;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let svg=`<svg class="fv-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">`;
+  let svg=`<svg class="fv-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">`, defs="", lines="", gi=0;
   rows.forEach(p=>p.shown.forEach(c=>{
     const x1=X(p.depth)+FV.W, y1=Y(p.y), x2=X(c.depth), y2=Y(c.y), dx=(x2-x1)/2;
     const d=`M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`;
-    const share=c.usd/root.usd, w=Math.max(1.5,Math.min(16,18*Math.sqrt(share)));
-    const col=(CAT[c.cat]||CAT[p.cat]||{c:"#a1a1aa"}).c;
-    const speed=(1.6-Math.min(1,share*4)*0.9).toFixed(2);
-    svg+=`<path d="${d}" class="fv-base" stroke-width="${w}"/>`;
-    svg+=`<path d="${d}" class="fv-flow" stroke="${col}" stroke-width="${Math.max(1.5,w*0.45)}" style="animation-duration:${speed}s"/>`;
-    if(!reduce && share>0.03){
-      const n=share>0.2?3:share>0.08?2:1;
-      for(let i=0;i<n;i++) svg+=`<g class="fv-coin"><circle r="${share>0.2?4.5:3.5}"/><text dy="3">$</text><animateMotion dur="${(2.4+share).toFixed(2)}s" begin="${(i*2.4/n).toFixed(2)}s" repeatCount="indefinite" path="${d}"/></g>`;
-    }
+    const col=(CAT[c.cat]||CAT[p.cat]||{c:"#a1a1aa"}).c, id="fg"+(gi++);
+    // Same width for every line; a soft band of colour travels from parent to child
+    const vx=x2-x1, vy=y2-y1;
+    defs+=`<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">
+      <stop offset="0" stop-color="${col}" stop-opacity="0"/><stop offset=".5" stop-color="${col}" stop-opacity="1"/><stop offset="1" stop-color="${col}" stop-opacity="0"/>
+      ${reduce?"":`<animateTransform attributeName="gradientTransform" type="translate" from="${-vx} ${-vy}" to="${vx} ${vy}" dur="2.4s" begin="${(p.depth*0.4).toFixed(1)}s" repeatCount="indefinite"/>`}</linearGradient>`;
+    lines+=`<path d="${d}" class="fv-base"/><path d="${d}" class="fv-flow" stroke="${reduce?col:`url(#${id})`}"/>`;
   }));
+  svg+=`<defs>${defs}</defs>${lines}`;
   svg+=`</svg>`;
   const nodes=rows.map(nd=>{
     const pct=nd.usd/root.usd*100, pctTxt=pct<10?pct.toFixed(1):Math.round(pct);
@@ -208,11 +207,8 @@ document.head.insertAdjacentHTML("beforeend",`<style>
 .fv.wide{width:min(1180px,calc(100vw - 32px));margin-left:50%;transform:translateX(-50%)}
 .fv-canvas{position:relative}
 .fv-svg{position:absolute;inset:0}
-.fv-base{fill:none;stroke:var(--line);stroke-linecap:round;opacity:.9}
-.fv-flow{fill:none;stroke-linecap:round;stroke-dasharray:3 11;animation:fvdash 1.2s linear infinite;opacity:.85}
-@keyframes fvdash{to{stroke-dashoffset:-14}}
-.fv-coin circle{fill:#16a34a;stroke:#fff;stroke-width:1.5}
-.fv-coin text{fill:#fff;font:700 6px Inter,sans-serif;text-anchor:middle}
+.fv-base{fill:none;stroke:var(--line);stroke-width:2;stroke-linecap:round}
+.fv-flow{fill:none;stroke-width:2;stroke-linecap:round}
 .fv-node{position:absolute;height:30px;display:flex;align-items:center;gap:7px;padding:0 6px 0 4px;background:var(--bg);border:1px solid var(--line);border-radius:9px;font-size:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .fv-node.fv-can{cursor:pointer}
 .fv-node.fv-can:hover{border-color:var(--muted)}
@@ -225,7 +221,7 @@ document.head.insertAdjacentHTML("beforeend",`<style>
 .fv-tog{color:var(--faint);font-size:13px;width:12px;text-align:center;flex:none}
 .fv-buy{border:0;background:var(--text);color:var(--bg);font-size:10px;font-weight:600;border-radius:6px;padding:2px 6px;cursor:pointer;flex:none}
 .fv-hint{font-size:12px;color:var(--faint);margin:8px 0 0}
-@media (prefers-reduced-motion: reduce){ .fv-flow{animation:none} }
+@media (prefers-reduced-motion: reduce){ .fv-flow{opacity:.5} }
 #buy-sheet{display:none}
 #buy-sheet.on{display:block}
 .bs-scrim{position:fixed;inset:0;background:rgba(17,17,19,.35);z-index:40}
