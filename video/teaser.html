@@ -115,12 +115,6 @@ S.innerHTML = `
        ["VRTx",LOGO.vertiv,"Vertiv",330,810],["ASMLx",LOGO.asml,"ASML",860,810],["OPENAI",LOGO.openai,"pre-IPO",585,905]]
       .map(([s,l,n,x,y],i)=>`<div class="tok" id="tk${i}" style="left:${x}px;top:${y}px">${l}${s} <i>${n}</i></div>`).join("")}
   </div>
-  <!-- scene 5b: made possible by Solana -->
-  <div id="s5b" class="abs" style="inset:0">
-    <div id="s5bg" class="abs" style="left:420px;top:150px;width:600px;height:600px;border-radius:50%;background:radial-gradient(closest-side,rgba(153,69,255,.28),rgba(20,241,149,.14) 55%,transparent 75%)"></div>
-    <div id="s5bl" class="abs" style="left:620px;top:250px;width:200px;height:200px;border-radius:52px;background:#fff;display:grid;place-items:center;box-shadow:0 40px 80px -30px rgba(153,69,255,.55)"><img src="logos/solana.png" style="width:120px;height:120px;object-fit:contain"></div>
-    <div id="s5bt" class="abs center serif" style="top:560px;font-size:110px;line-height:1">Made possible by <span style="background:var(--sol);-webkit-background-clip:text;color:transparent;padding-right:.06em">Solana</span>.</div>
-  </div>
   <!-- scene 6: the turn -->
   <div id="s6" class="abs" style="inset:0">
     <div id="s6h" class="abs center serif" style="top:130px;font-size:74px;line-height:1.1">What if your spending<br>also built a portfolio?</div>
@@ -192,27 +186,22 @@ function renderFrame(t){
   set($("s5s"),out(prog(t,18.7,19.2)));
   const sm=out(prog(t,19.0,19.6)); set($("solmark"),sm,`scale(${.6+.4*sm}) rotate(${(1-sm)*-20}deg)`);
   for(let i=0;i<7;i++){ const k=out(prog(t,19.4+i*.18,19.9+i*.18)); const fy=Math.sin((t+i)*1.6)*4; set($("tk"+i),k,`translateY(${(1-k)*24+fy}px) scale(${.85+.15*k})`); }
-  // scene 5b (21.9 - 24.1): made possible by Solana
-  set($("s5b"),win(t,21.9,24.2,.4));
-  const lb=out(prog(t,22.0,22.6)); set($("s5bl"),lb,`scale(${.7+.3*lb})`);
-  set($("s5bg"),out(prog(t,22.0,22.9)),`scale(${.8+.2*out(prog(t,22.0,23.4))})`);
-  set($("s5bt"),out(prog(t,22.4,23.0)),`translateY(${(1-out(prog(t,22.4,23.0)))*24}px)`);
-  // scene 6 (24.1 - 27.3)
-  set($("s6"),win(t,24.1,27.4));
-  set($("s6h"),out(prog(t,24.2,24.8)),`translateY(${(1-out(prog(t,24.2,24.8)))*20}px)`);
-  const c=out(prog(t,24.6,25.2)); set($("s6card"),c,`translateY(${(1-c)*30}px)`);
-  const g=ease(prog(t,25.1,26.4)); $("s6v").textContent="$"+Math.round(480+457*g); $("s6p").textContent="+"+Math.round(95*g)+"%"; $("s6b").style.width=(51+49*g)+"%";
-  set($("s6c"),out(prog(t,26.2,26.7)));
-  set($("s6d"),out(prog(t,25.8,26.3)));
-  // scene 7 (27.3 - 30)
-  set($("s7"),out(prog(t,27.3,27.8)));
-  set($("s7h"),out(prog(t,27.4,28.0)),`translateY(${(1-out(prog(t,27.4,28.0)))*24}px)`);
-  set($("s7s"),out(prog(t,27.9,28.4)));
-  const u=out(prog(t,28.3,28.8)); set($("s7u"),u,`scale(${.94+.06*u})`);
-  set($("s7b"),out(prog(t,28.8,29.2)));
+  // scene 6 (21.9 - 25.3)
+  set($("s6"),win(t,21.9,25.4));
+  set($("s6h"),out(prog(t,22.0,22.6)),`translateY(${(1-out(prog(t,22.0,22.6)))*20}px)`);
+  const c=out(prog(t,22.5,23.1)); set($("s6card"),c,`translateY(${(1-c)*30}px)`);
+  const g=ease(prog(t,23.0,24.4)); $("s6v").textContent="$"+Math.round(480+457*g); $("s6p").textContent="+"+Math.round(95*g)+"%"; $("s6b").style.width=(51+49*g)+"%";
+  set($("s6c"),out(prog(t,24.2,24.7)));
+  set($("s6d"),out(prog(t,23.8,24.3)));
+  // scene 7 (25.3 - 28)
+  set($("s7"),out(prog(t,25.3,25.8)));
+  set($("s7h"),out(prog(t,25.4,26.0)),`translateY(${(1-out(prog(t,25.4,26.0)))*24}px)`);
+  set($("s7s"),out(prog(t,25.9,26.4)));
+  const u=out(prog(t,26.3,26.8)); set($("s7u"),u,`scale(${.94+.06*u})`);
+  set($("s7b"),out(prog(t,26.8,27.2)));
 }
 window.renderFrame=renderFrame;
-window.DURATION=30;
+window.DURATION=28;
 // live preview when opened directly in a browser
 if(!location.search.includes("render")){ const t0=performance.now(); const loop=()=>{ renderFrame(((performance.now()-t0)/1000)%DURATION); requestAnimationFrame(loop); }; document.fonts.ready.then(loop); }
 </script></body></html>
