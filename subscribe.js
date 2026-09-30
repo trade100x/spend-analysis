@@ -41,7 +41,7 @@
   bar.innerHTML = `
     <button class="sb-x" aria-label="Dismiss">×</button>
     <div class="sb-txt"><b>Cards that think before you spend.</b>
-      <span id="sb-sub"><strong>Agentic cards</strong>: one for every subscription. Each caps, pauses and cancels on its own, then invests what it saves in the companies you pay. Your personal CFO, on autopilot.</span>
+      <span id="sb-sub">One smart card for every subscription. Each caps, pauses and cancels on its own, then invests what it saves in the companies you pay. Your personal CFO, on autopilot.</span>
       <div class="sb-msg" id="sb-msg"></div></div>
     <form novalidate>
       <input type="email" name="email" placeholder="you@email.com" autocomplete="email" required aria-label="Email address">
@@ -71,7 +71,7 @@
       store.set("sa-sub", "done");
       bar.classList.add("done");
       bar.querySelector(".sb-txt b").textContent = d.already ? "You're already on the list ✓" : "You're on the list ✓";
-      bar.querySelector("#sb-sub").textContent = "Your card is reserved. We'll email you the moment agentic cards go live.";
+      bar.querySelector("#sb-sub").textContent = "Your card is reserved. We'll email you the moment your cards go live.";
     } catch (err) {
       msg(err.message || "Something went wrong. Please try again.");
       btn.disabled = false; btn.textContent = "Claim my card";
