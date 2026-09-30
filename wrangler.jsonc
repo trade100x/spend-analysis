@@ -11,6 +11,9 @@
     "binding": "ASSETS",
     "run_worker_first": ["/api/*"]
   },
+  "routes": [
+    { "pattern": "moneyflow.crazyidea.fun", "custom_domain": true }
+  ],
   "triggers": { "crons": ["0 5 * * *"] },
   "kv_namespaces": [
     { "binding": "SUBSCRIBERS", "id": "56bbbc16a6224580baf2143432e87e5d" }

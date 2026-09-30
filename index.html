@@ -410,7 +410,7 @@ function renderSummary(R){
     <h2>Companies you fund most <small>per year${market!=="ALL"?` · ${REG[market]}`:""}</small></h2>
     <div id="topCos"></div>
 
-    <h2>If you'd invested it instead <span class="periods">${[1,2,3].map(y=>`<button data-y="${y}" class="${y===period?"on":""}">${y}Y</button>`).join("")}</span></h2>
+    <h2>What if you also invested? <span class="periods">${[1,2,3].map(y=>`<button data-y="${y}" class="${y===period?"on":""}">${y}Y</button>`).join("")}</span></h2>
     <div id="returns"><p class="sub">Loading price history…</p></div>
 
     <h2>Invest alongside your spending <small>illustrative split</small></h2>
@@ -520,8 +520,8 @@ function drawReturns(R){
   if(!PRICES||!Object.keys(PRICES.s).length){ el.innerHTML=`<p class="sub">Price history is unavailable right now.</p>`; return; }
   const S=simulate(R,period); if(!S.invested){ el.innerHTML=`<p class="sub">None of these purchases reach companies with price history${market!=="ALL"?" in "+REG[market]:""}.</p>`; return; }
   const pct=(v,i)=>{ const x=(v/i-1)*100; return `<span class="${x>=0?"up":"dn"}">${x>=0?"+":""}${x.toFixed(1)}%</span>`; };
-  const moTxt=R.mo?`the ${fmt(R.mo)} a month you spend`:"", onTxt=R.once?`${R.mo?" plus ":""}your ${fmt(R.once)} of one-off purchases`:"";
-  el.innerHTML=`<p class="rbig">If you'd invested ${moTxt}${onTxt} in the companies behind it, starting ${S.years} year${S.years>1?"s":""} ago, your ${fmt0(S.invested)} would be worth <b>${fmt0(S.value)}</b> today (${pct(S.value,S.invested)}).</p>
+  const moTxt=R.mo?`${fmt(R.mo)} a month alongside your spending`:"", onTxt=R.once?`${R.mo?" plus ":""}the same ${fmt(R.once)} alongside your one-off purchases`:"";
+  el.innerHTML=`<p class="rbig">If you had also invested ${moTxt}${onTxt} in the companies behind it, starting ${S.years} year${S.years>1?"s":""} ago, your ${fmt0(S.invested)} would be worth <b>${fmt0(S.value)}</b> today (${pct(S.value,S.invested)}).</p>
     <div class="rcards">
       <div class="rcard me"><small>Your spending basket</small><b class="num">${fmt0(S.value)}</b>${pct(S.value,S.invested)}</div>
       <div class="rcard"><small>Same money in the S&amp;P 500 (SPY)</small><b class="num">${fmt0(S.benchVal.SPY)}</b>${pct(S.benchVal.SPY,S.invested)}</div>
