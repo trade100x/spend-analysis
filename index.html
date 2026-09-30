@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spend Analysis</title>
+<title>Moneyflow</title>
 <meta name="description" content="Pick the brands you pay each month and see the companies, stocks and tokens your money funds.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -201,7 +201,7 @@ details.all .irow{display:flex;justify-content:space-between;padding:4px 0;borde
 </head>
 <body>
 <div class="wrap">
-  <header><a class="wordmark" href="./">Spend Analysis</a><a class="link" href="dashboard.html">Card demo →</a></header>
+  <header><a class="wordmark" href="./">Moneyflow</a><a class="link" href="dashboard.html">Card demo →</a></header>
 
   <h1>Where does your money really go?</h1>
   <p class="lede">Pick what you spend on: brands, products, groceries, even a trip abroad. See which companies, stocks and tokens your money ends up funding.</p>
@@ -237,7 +237,7 @@ const POPULAR=["openai","netflix","amazon","apple","uber","spotify","starbucks",
 const LIFE=Object.keys(M).filter(k=>M[k].group==="life");
 const AI_TREND=["higgsfield","perplexity","cursor","runway","suno","elevenlabs","lovable","midjourney","gemini","grok","kling","characterai"];
 let lines=[];          // [{k, p, amt}]
-let market="ALL", mode="summary", flowIdx=0, period=2;
+let market="ALL", mode="flow", flowIdx=0, period=2;
 const API_BASE = /github\.io$|^localhost$|^127\.|^$/.test(location.hostname) ? "https://spend-analysis.madmarketagents.workers.dev" : "";
 const b64e = o => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 const b64d = t => JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g,"+").replace(/_/g,"/")))));

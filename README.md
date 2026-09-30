@@ -1,4 +1,4 @@
-# Spend Analysis
+# Moneyflow
 
 See where your money really goes. Pick what you spend on (brands, specific products, groceries, even a trip abroad) and trace it through supply chains to the listed companies, stocks and tokens it funds.
 
