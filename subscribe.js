@@ -40,13 +40,13 @@
   bar.setAttribute("aria-label", "Early access signup");
   bar.innerHTML = `
     <button class="sb-x" aria-label="Dismiss">×</button>
-    <div class="sb-txt"><b>Cards that think before you spend.</b>
-      <span id="sb-sub">One smart card for every subscription. Each caps, pauses and cancels on its own, then invests what it saves in the companies you pay. Your personal CFO, on autopilot.</span>
+    <div class="sb-txt"><b>Your money just hired a CFO.</b>
+      <span id="sb-sub">A personal CFO that watches every subscription, cuts what you don't use, blocks surprise charges and invests the savings in the companies you already pay. Always on, built for everyone.</span>
       <div class="sb-msg" id="sb-msg"></div></div>
     <form novalidate>
       <input type="email" name="email" placeholder="you@email.com" autocomplete="email" required aria-label="Email address">
       <input class="sb-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <button type="submit">Claim my card</button>
+      <button type="submit">Hire my CFO</button>
     </form>`;
   document.body.appendChild(bar);
   document.body.classList.add("sb-pad");
@@ -71,10 +71,10 @@
       store.set("sa-sub", "done");
       bar.classList.add("done");
       bar.querySelector(".sb-txt b").textContent = d.already ? "You're already on the list ✓" : "You're on the list ✓";
-      bar.querySelector("#sb-sub").textContent = "Your card is reserved. We'll email you the moment your cards go live.";
+      bar.querySelector("#sb-sub").textContent = "You're in. We'll email you the moment your CFO is ready.";
     } catch (err) {
       msg(err.message || "Something went wrong. Please try again.");
-      btn.disabled = false; btn.textContent = "Claim my card";
+      btn.disabled = false; btn.textContent = "Hire my CFO";
     }
   };
 })();
