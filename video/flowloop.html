@@ -23,6 +23,9 @@ svg.w{position:absolute;inset:0}
 .node b{display:block;font-size:19px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .node span{display:block;font-size:16px;color:var(--muted);white-space:nowrap}
 .node.priv{background:var(--soft)}
+.node.sm b{font-size:17px}
+.node.sm{gap:9px;padding-right:10px}
+.node.sm .logo{width:36px;height:36px;border-radius:10px}
 .logo{width:42px;height:42px;border-radius:11px;background:#fff;display:grid;place-items:center;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.04)}
 .logo img{width:64%;height:64%;object-fit:contain}
 .logo.t{color:#fff;font-weight:700;font-size:15px}
@@ -53,15 +56,15 @@ const SCENES = [
     {id:"chips",c:2,y:290,t:1.7,title:"AI chips",sub:"$3.78",dot:"#22c55e",p:"cloud"},
     {id:"mem",c:2,y:470,t:1.85,title:"HBM memory",sub:"$0.94",dot:"#06b6d4",p:"cloud"},
     {id:"pow",c:2,y:620,t:2.0,title:"Power & cooling",sub:"$1.51",dot:"#f59e0b",p:"cloud"},
-    {id:"nvda",c:3,y:220,t:2.4,title:"NVIDIA",sub:"$0.50",logo:LG.nvidia,p:"chips",w:180},
-    {id:"tsmc",c:3,y:290,t:2.5,title:"TSMC",sub:"$0.93",logo:LG.tsmc,p:"chips",w:180},
-    {id:"amd",c:3,y:360,t:2.6,title:"AMD",sub:"$0.50",logo:LG.amd,p:"chips",w:180},
+    {id:"nvda",c:3,y:220,t:2.4,title:"NVIDIA",sub:"$0.50",logo:LG.nvidia,p:"chips",w:176},
+    {id:"tsmc",c:3,y:290,t:2.5,title:"TSMC",sub:"$0.93",logo:LG.tsmc,p:"chips",w:176},
+    {id:"amd",c:3,y:360,t:2.6,title:"AMD",sub:"$0.50",logo:LG.amd,p:"chips",w:176},
     {id:"skh",c:3,y:440,t:2.8,title:"SK hynix",sub:"$0.32",logo:LG.skhynix,p:"mem"},
     {id:"mu",c:3,y:510,t:2.9,title:"Micron",sub:"$0.32",logo:LG.micron,p:"mem"},
     {id:"vrt",c:3,y:590,t:3.1,title:"Vertiv",sub:"$0.24",logo:LG.vertiv,p:"pow"},
     {id:"gev",c:3,y:660,t:3.2,title:"GE Vernova",sub:"$0.24",logo:LG.gev,p:"pow"},
-    {id:"asml",c:4,y:220,t:3.5,title:"ASML",sub:"$0.10",logo:LG.asml,p:"tsmc",x:1178,w:190},
-    {id:"tel",c:4,y:360,t:3.6,title:"Tokyo Electron",sub:"$0.10",logo:LG.tel,p:"tsmc",x:1178,w:190},
+    {id:"asml",c:4,y:220,t:3.5,title:"ASML",sub:"$0.10",logo:LG.asml,p:"tsmc",x:1168,w:200},
+    {id:"tel",c:4,y:360,t:3.6,title:"Tokyo Electron",sub:"$0.10",logo:LG.tel,p:"tsmc",x:1168,w:200},
   ]},
   { head:"Where your <i>$17.99</i> goes.", sub:"Netflix Standard · monthly", icon:"netflix", nodes:[
     {id:"r",c:0,y:560,t:.5,title:"Netflix Standard",sub:"$17.99",logo:LG.netflix,root:1},
@@ -97,8 +100,8 @@ const SCENES = [
     {id:"skh",c:3,y:595,t:3.05,title:"SK hynix",sub:"$20.98",logo:LG.skhynix,p:"mem"},
     {id:"mu",c:3,y:665,t:3.15,title:"Micron",sub:"$20.98",logo:LG.micron,p:"mem"},
     {id:"sony",c:3,y:760,t:3.3,title:"Sony",sub:"$16.18",logo:LG.sony,p:"cam"},
-    {id:"asml",c:4,y:280,t:3.5,title:"ASML",sub:"$5.39",logo:LG.asml,p:"tsmc",x:1178,w:190},
-    {id:"tel",c:4,y:380,t:3.6,title:"Tokyo Electron",sub:"$5.39",logo:LG.tel,p:"tsmc",x:1178,w:190},
+    {id:"asml",c:4,y:280,t:3.5,title:"ASML",sub:"$5.39",logo:LG.asml,p:"tsmc",x:1168,w:200},
+    {id:"tel",c:4,y:380,t:3.6,title:"Tokyo Electron",sub:"$5.39",logo:LG.tel,p:"tsmc",x:1168,w:200},
   ]},
 ];
 const SLEN=8, DURATION=SCENES.length*SLEN;
@@ -112,7 +115,7 @@ const S=document.getElementById("stage");
 S.innerHTML = SCENES.map((sc,si)=>`<div class="scene" id="sc${si}">
     <div class="hd"><div class="bi"><img src="logos/${sc.icon}.png"></div><div><h1>${sc.head}</h1><p>${sc.sub}</p></div></div>
     <svg class="w" id="w${si}" width="1440" height="1080"></svg>
-    ${sc.nodes.map(n=>`<div class="node ${n.root?"root":""} ${n.priv?"priv":""}" id="n${si}_${n.id}" style="left:${X(n)}px;top:${n.y-NH/2}px;width:${W(n)}px">
+    ${sc.nodes.map(n=>`<div class="node ${n.root?"root":""} ${n.priv?"priv":""} ${W(n)<=200?"sm":""}" id="n${si}_${n.id}" style="left:${X(n)}px;top:${n.y-NH/2}px;width:${W(n)}px">
       ${n.logo?n.logo:`<span class="dot" style="background:${n.dot}"></span>`}<div style="min-width:0"><b>${n.title}</b><span>${n.sub}</span></div></div>`).join("")}
   </div>`).join("") + `<div class="dots">${SCENES.map((_,i)=>`<i id="dot${i}"></i>`).join("")}</div>
   <div class="foot">Try it with your own spending · <b>moneyflow.crazyidea.fun</b></div>`;
