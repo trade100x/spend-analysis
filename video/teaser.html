@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset="utf-8">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 /* 1080x1080 teaser, rendered frame-by-frame: every frame is a pure function of time t (seconds) */
 :root{--bg:#f2f1ee;--soft:#e8e6e2;--surface:#faf9f7;--line:#dedad4;--text:#1a1a1a;--muted:#76726c;--faint:#a7a39c;--green:#1f9d55;
@@ -9,7 +9,7 @@
 html,body{width:1080px;height:1080px;overflow:hidden;background:var(--bg);font-family:Inter,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
 .stage{position:relative;width:1080px;height:1080px}
 .abs{position:absolute}
-.serif{font-family:Newsreader,Georgia,serif;font-weight:500;letter-spacing:-.025em}
+.serif{font-family:"Instrument Serif",Georgia,serif;font-weight:400;letter-spacing:-.01em}
 .center{left:0;right:0;text-align:center}
 .pill{display:inline-flex;align-items:center;gap:10px;background:var(--soft);border-radius:99px;padding:10px 20px;font-size:24px;color:var(--muted)}
 .logo{width:64px;height:64px;border-radius:16px;background:#fff;display:grid;place-items:center;box-shadow:0 1px 0 rgba(0,0,0,.04);overflow:hidden;flex:none}
@@ -18,7 +18,7 @@ html,body{width:1080px;height:1080px;overflow:hidden;background:var(--bg);font-f
 /* receipt */
 #receipt{left:340px;top:250px;width:400px;background:var(--surface);border-radius:32px;padding:34px;box-shadow:0 30px 60px -30px rgba(0,0,0,.18)}
 #receipt .row{display:flex;align-items:center;gap:18px}
-#receipt .amt{font-size:84px;margin-top:22px}
+#receipt .amt{font-size:100px;margin-top:18px;line-height:1}
 #receipt small{display:block;font-size:22px;color:var(--muted)}
 #receipt b{font-size:28px;font-weight:600}
 /* tree */
@@ -32,7 +32,7 @@ svg#wires{position:absolute;inset:0}
 .node.root{border:2px solid var(--text)}
 /* stats + chips */
 .stat{display:inline-block;background:var(--surface);border-radius:28px;padding:26px 30px;margin:0 10px;min-width:260px}
-.stat b{display:block;font-family:Newsreader,serif;font-size:64px;font-weight:500;letter-spacing:-.02em}
+.stat b{display:block;font-family:'Instrument Serif',serif;font-size:76px;font-weight:400;letter-spacing:-.01em;line-height:1}
 .stat span{font-size:22px;color:var(--muted)}
 .tok{position:absolute;display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:99px;padding:10px 22px 10px 10px;font-size:26px;font-weight:600;box-shadow:0 10px 30px -18px rgba(0,0,0,.25)}
 .tok .logo{width:48px;height:48px;border-radius:99px}
@@ -84,13 +84,13 @@ S.innerHTML = `
     <div class="abs center" style="top:120px"><span class="pill">🔔 Card payment · just now</span></div>
     <div id="receipt" class="abs"><div class="row">${LOGO.openai}<div><b>OpenAI</b><small>ChatGPT Plus · monthly</small></div></div>
       <div class="amt serif" id="amt">$0.00</div></div>
-    <div id="s1h" class="abs center serif" style="top:700px;font-size:66px;line-height:1.1">Every month, you pay<br>$20 for ChatGPT.</div>
+    <div id="s1h" class="abs center serif" style="top:700px;font-size:76px;line-height:1.1">Every month, you pay<br>$20 for ChatGPT.</div>
   </div>
   <!-- scene 2: the question -->
-  <div id="s2" class="abs center serif" style="top:390px;font-size:88px;line-height:1.05">Ever wondered where<br>that $20 <span style="background:var(--accent);-webkit-background-clip:text;color:transparent">actually goes?</span></div>
+  <div id="s2" class="abs center serif" style="top:390px;font-size:101px;line-height:1.05">Ever wondered where<br>that $20 <span style="font-style:italic;background:var(--accent);-webkit-background-clip:text;color:transparent;padding-right:.08em">actually goes?</span></div>
   <!-- scene 3: the flow -->
   <div id="s3" class="abs" style="inset:0">
-    <div id="s3h" class="abs center serif" style="top:40px;font-size:48px">Follow your $20.</div>
+    <div id="s3h" class="abs center serif" style="top:40px;font-size:55px">Follow your $20.</div>
     <svg id="wires" width="1080" height="1080"></svg>
     ${N.map(n=>`<div class="node ${n.root?"root":""}" id="n_${n.id}" style="left:${nx(n)}px;top:${ny(n)}px">
       ${n.logo?n.logo:`<span class="dot" style="background:${n.dot}"></span>`}<div style="min-width:0"><b>${n.title}</b><span>${n.sub}</span></div></div>`).join("")}
@@ -101,12 +101,12 @@ S.innerHTML = `
     <div class="abs center" style="top:250px">
       <div class="stat" id="st1"><b>$20</b><span>a month</span></div><div class="stat" id="st2"><b id="st2n">0</b><span>public companies</span></div><div class="stat" id="st3"><b>3</b><span>continents</span></div>
     </div>
-    <div id="s4h" class="abs center serif" style="top:620px;font-size:62px;line-height:1.12">Wall Street tracks these<br>money flows every day.</div>
+    <div id="s4h" class="abs center serif" style="top:620px;font-size:71px;line-height:1.12">Wall Street tracks these<br>money flows every day.</div>
     <div id="s4s" class="abs center" style="top:810px;font-size:30px;color:var(--muted)">Retail investors never could.</div>
   </div>
   <!-- scene 5: Solana -->
   <div id="s5" class="abs" style="inset:0">
-    <div id="s5h" class="abs center serif" style="top:120px;font-size:84px;line-height:1.05">Now you can<br>own them.</div>
+    <div id="s5h" class="abs center serif" style="top:120px;font-size:97px;line-height:1.05">Now you can<br>own them.</div>
     <div id="s5s" class="abs center" style="top:350px;font-size:32px;color:var(--muted)">Tokenized stocks, onchain and 24/7 on <b style="background:var(--sol);-webkit-background-clip:text;color:transparent">Solana</b>.</div>
     <div id="solmark" class="abs" style="left:476px;top:560px;width:128px;height:128px;border-radius:36px;background:#fff;display:grid;place-items:center;box-shadow:0 30px 60px -20px rgba(153,69,255,.55)"><img src="logos/solana.png" style="width:76px;height:76px;object-fit:contain"></div>
     ${[["NVDAx",LOGO.nvidia,"NVIDIA",200,470],["TSMx",LOGO.tsmc,"TSMC",690,470],["MUx",LOGO.micron,"Micron",120,640],["AMDx",LOGO.amd,"AMD",720,640],
@@ -115,10 +115,10 @@ S.innerHTML = `
   </div>
   <!-- scene 6: the turn -->
   <div id="s6" class="abs" style="inset:0">
-    <div id="s6h" class="abs center serif" style="top:130px;font-size:64px;line-height:1.1">What if you invested<br>it instead?</div>
+    <div id="s6h" class="abs center serif" style="top:130px;font-size:74px;line-height:1.1">What if you invested<br>it instead?</div>
     <div id="s6card" class="abs card" style="left:150px;top:390px;width:780px">
       <div style="font-size:24px;color:var(--muted)">Your ChatGPT money, invested in the companies behind it · last 2 years</div>
-      <div style="display:flex;align-items:baseline;gap:26px;margin-top:22px"><span class="serif" style="font-size:60px;color:var(--faint)">$480</span><span style="font-size:44px;color:var(--faint)">→</span><span class="serif" id="s6v" style="font-size:108px">$480</span></div>
+      <div style="display:flex;align-items:baseline;gap:26px;margin-top:22px"><span class="serif" style="font-size:69px;color:var(--faint)">$480</span><span style="font-size:51px;color:var(--faint)">→</span><span class="serif" id="s6v" style="font-size:124px">$480</span></div>
       <div id="s6p" style="font-size:38px;font-weight:600;color:var(--green);margin-top:6px">+0%</div>
       <div class="bar" style="background:var(--soft);margin-top:26px"><div id="s6b" class="bar" style="background:var(--green);width:0%"></div></div>
       <div id="s6c" style="font-size:24px;color:var(--muted);margin-top:18px">Same money in the S&amp;P 500: <b style="color:var(--text)">$563</b> (+17%)</div>
@@ -128,7 +128,7 @@ S.innerHTML = `
   <!-- scene 7: call to action -->
   <div id="s7" class="abs" style="inset:0">
     <div class="abs" style="left:0;right:0;top:0;height:14px;background:var(--accent)"></div>
-    <div id="s7h" class="abs center serif" style="top:300px;font-size:96px;line-height:1.02">Where does your<br>money really go?</div>
+    <div id="s7h" class="abs center serif" style="top:300px;font-size:110px;line-height:1.02">Where does your<br>money really go?</div>
     <div id="s7s" class="abs center" style="top:575px;font-size:32px;color:var(--muted)">Pick what you spend on. See who you fund. Invest smarter.</div>
     <div id="s7u" class="abs center" style="top:700px"><span class="pill" style="background:var(--text);color:#fff;font-size:30px;padding:18px 34px">spend-analysis.madmarketagents.workers.dev</span></div>
     <div id="s7b" class="abs center" style="top:900px;font-size:24px;color:var(--faint)">Free · works for any brand, any country</div>
