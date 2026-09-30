@@ -25,13 +25,12 @@ Hard figures (revenue, users, ownership stakes) were fact-checked against compan
 Static files, no build step. Logos come from Google's favicon service, with DuckDuckGo as a fallback.
 
 ## Early-access signups
-A sticky bar (`subscribe.js`) posts emails to the Cloudflare Worker (`worker.js`), which stores them in the `SUBSCRIBERS` KV namespace. It validates emails, drops bots via a hidden field, and de-duplicates.
+The signup card (`subscribe.js`) posts to the Worker (`/api/subscribe`), which stores one row per email in the **D1 database `spend-analysis`, table `subscribers`** (email, created_at, page, country). Invalid emails are rejected, bots dropped via a honeypot field, duplicates ignored.
 
-```
-npx wrangler kv key list --binding SUBSCRIBERS --remote              # all signups
-npx wrangler kv key get "sub:name@example.com" --binding SUBSCRIBERS --remote   # one signup's details
-```
-Deploy to Cloudflare with `npx wrangler deploy`.
+- Dashboard: Cloudflare → Storage & Databases → D1 → spend-analysis → Tables → subscribers
+- CLI: `npx wrangler d1 execute spend-analysis --remote --command "SELECT * FROM subscribers ORDER BY created_at DESC"`
+
+The KV namespace `SUBSCRIBERS` now only holds caches (prices, ownership lookups).
 
 ## Live data sources
 - **Prices:** monthly closes from Yahoo Finance, built by `tools/fetch_prices.py` into `prices.json` and refreshed daily by the Worker's cron (`/api/prices`, cached in KV). They power the "If you'd invested it instead" returns.

@@ -1,5 +1,5 @@
 // Cloudflare Worker: serves the static site plus a few JSON APIs.
-//   POST /api/subscribe   early-access signups -> KV (list: npx wrangler kv key list --binding SUBSCRIBERS --remote)
+//   POST /api/subscribe   early-access signups -> D1 table `subscribers` (Cloudflare dashboard: Storage & Databases > D1 > spend-analysis)
 //   GET  /api/prices      monthly closes for every company (refreshed daily by cron from Yahoo Finance; falls back to /prices.json)
 //   GET  /api/lookup?q=   who owns a brand, and whether that owner is listed (Wikidata), cached 30 days
 
@@ -110,13 +110,10 @@ export default {
       if (body.website) return json({ ok: true }); // honeypot field: bots fill it, people never see it
       const email = String(body.email || "").trim().toLowerCase();
       if (email.length > 254 || !EMAIL.test(email)) return json({ error: "Please enter a valid email." }, 400);
-      const key = "sub:" + email;
-      const existing = await env.SUBSCRIBERS.get(key);
-      if (!existing) {
-        await env.SUBSCRIBERS.put(key, JSON.stringify({
-          email, ts: new Date().toISOString(), page: String(body.page || "").slice(0, 200), country: req.cf?.country || "",
-        }));
-      }
+      // Signups live in the D1 table `subscribers` (one row per email)
+      const res = await env.DB.prepare("INSERT OR IGNORE INTO subscribers (email, created_at, page, country) VALUES (?1, ?2, ?3, ?4)")
+        .bind(email, new Date().toISOString(), String(body.page || "").slice(0, 200), req.cf?.country || "").run();
+      const existing = res.meta.changes === 0;
       return json({ ok: true, already: !!existing });
     }
 

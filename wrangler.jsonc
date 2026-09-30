@@ -14,5 +14,8 @@
   "triggers": { "crons": ["0 5 * * *"] },
   "kv_namespaces": [
     { "binding": "SUBSCRIBERS", "id": "56bbbc16a6224580baf2143432e87e5d" }
+  ],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "spend-analysis", "database_id": "557bf830-fb8e-4a49-8c41-49728fdcd03b" }
   ]
 }
