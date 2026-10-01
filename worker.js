@@ -138,6 +138,7 @@ export default {
     if (url.pathname.startsWith("/api/") && req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
     if (url.pathname === "/api/subscribe") {
+      return json({ error: "Signups are closed." }, 410);   // email collection switched off
       if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
       let body;
       try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
