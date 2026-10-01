@@ -171,6 +171,29 @@ body.open{overflow:hidden}
 .chat .tc{display:inline-flex;gap:6px;align-items:center;font:12px ui-monospace,Menlo,monospace;background:#ede9fe;color:#5b21b6;border-radius:8px;padding:4px 8px;margin:0 0 8px}
 .chat .tc.no{background:#fee2e2;color:#991b1b}.chat .tc.ok{background:#dcfce7;color:#166534}
 @media (max-width:560px){ .agstats{grid-template-columns:1fr} .acard{flex-basis:170px} }
+.ttabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--soft);border-radius:12px;padding:4px;margin:18px 0 6px}
+.ttabs button{border:0;background:none;border-radius:9px;padding:8px 6px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer}
+.ttabs button.on{background:var(--bg);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.tpane[hidden]{display:none}
+.kvs{border:1px solid var(--line);border-radius:12px;padding:2px 14px;margin-top:10px}
+.kv{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.kvs .kv:first-child{border-top:0}
+.kv span{color:var(--muted)}
+.kv b{font-weight:500;text-align:right}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.stp{display:inline-block;font-size:11px;font-weight:600;color:#166534;background:#dcfce7;border-radius:6px;padding:1px 7px}
+.stp.pend{color:#92400e;background:#fef3c7}
+.tactions{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px}
+.sstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.sstats div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12px;color:var(--muted)}
+.sstats b{display:block;font-size:17px;color:var(--text)}
+.cbar{display:grid;grid-template-columns:120px 1fr 80px;gap:10px;align-items:center;font-size:13px;color:var(--muted);padding:5px 0}
+.cbar i{display:block;height:7px;background:var(--soft);border-radius:99px;overflow:hidden}
+.cbar em{display:block;height:100%;background:#c9c5be;border-radius:99px}
+.cbar.me{color:var(--text);font-weight:600}
+.cbar.me em{background:var(--text)}
+.cbar b{text-align:right;font-weight:500}
+.tagx{font-style:normal;font-size:10.5px;font-weight:600;background:var(--soft);border-radius:5px;padding:1px 5px;margin-left:4px}
 .sheet h4{font-size:13px;font-weight:600;margin:28px 0 8px;color:var(--text)}
 
 .node{border-top:1px solid var(--line)}
@@ -281,7 +304,7 @@ body.open{overflow:hidden}
 const TX = [
   ["2026-09-27","starbucks","Starbucks #1142",6.45],
   ["2026-09-26","uber","Uber Trip",24.60],
-  ["2026-09-26","groceries","Whole Foods Market",142.30],
+  ["2026-09-26","groceries","Carrefour · City Centre Deira",142.30],
   ["2026-09-25","amazon","Amazon.com order",86.40],
   ["2026-09-24","openai.plus","OpenAI · ChatGPT Plus",20.00],
   ["2026-09-23","shell","Shell Station 0381",58.20],
@@ -289,7 +312,7 @@ const TX = [
   ["2026-09-21","airbnb","Airbnb · 2 nights",412.00],
   ["2026-09-20","uber","Uber Trip",18.30],
   ["2026-09-19","spotify","Spotify Premium",11.99],
-  ["2026-09-18","zomato","Zomato order",18.40],
+  ["2026-09-18","doordash","DoorDash order",18.40],
   ["2026-09-18","amazon","Amazon Marketplace",34.99],
   ["2026-09-17","netflix","Netflix Standard",17.99],
   ["2026-09-16","figma","Figma Professional",20.00],
@@ -399,37 +422,115 @@ function renderTx(){
   document.querySelectorAll("#txlist .row").forEach(b=>b.onclick=()=>openTx(+b.dataset.id));
 }
 
+/* ---------- Transaction details: who, where, when, how it was paid (demo data) ---------- */
+// Story: the cardholder lives in New York and was in Dubai from Sep 20-27 (purchases there were charged in AED).
+const AED = 3.6725;                                   // the dirham is pegged to the dollar at 3.6725
+const MCC = {openai:["5734","Computer software"],netflix:["4899","Streaming & cable"],spotify:["5815","Digital media"],amazon:["5999","Online retail"],
+  uber:["4121","Taxis & rideshare"],starbucks:["5814","Fast food & coffee"],figma:["5734","Computer software"],apple:["5818","Digital goods"],
+  airbnb:["7011","Lodging"],shell:["5541","Fuel stations"],groceries:["5411","Grocery stores"],electricity:["4900","Utilities"],doordash:["5812","Restaurants & delivery"]};
+const DESCRIPTOR = {openai:"OPENAI *CHATGPT SUBSCR",netflix:"NETFLIX.COM",spotify:"SPOTIFY P2F9A1C4",amazon:"AMZN MKTP US*2K4QH7",uber:"UBER *TRIP HELP.UBER.COM",
+  figma:"FIGMA.COM",apple:"APPLE.COM/BILL",airbnb:"AIRBNB * HMXQ4T2ZPD",doordash:"DOORDASH*ORDER",electricity:"CON ED OF NY AUTOPAY"};
+const ONLINE = {openai:"openai.com",netflix:"netflix.com",spotify:"spotify.com",amazon:"amazon.com",figma:"figma.com",apple:"apple.com",doordash:"doordash.com",electricity:"coned.com"};
+const AGENT_CARD = {openai:"2041",netflix:"7730",spotify:"5512",uber:"3309",figma:"8124",amazon:"6671",apple:"1190"};
+function txMeta(t){
+  const day=+t.d.slice(8), inDubai = t.m==="airbnb" || (["uber","starbucks","shell","groceries"].includes(t.m) && day>=20 && day<=27);
+  const place = ONLINE[t.m] ? `Online · ${ONLINE[t.m]}` :
+    inDubai ? ({starbucks:t.label.includes("1142")?"Dubai Mall, Dubai, AE":"Jumeirah Beach Rd, Dubai, AE",shell:"Sheikh Zayed Rd, Dubai, AE",uber:"Dubai, AE",
+                airbnb:"Dubai Marina, Dubai, AE",groceries:"City Centre Deira, Dubai, AE"})[t.m] :
+    ({starbucks:"Midtown Manhattan, New York, US",shell:"Atlantic Ave, Brooklyn, US",uber:"New York, US",groceries:"Chelsea, New York, US"})[t.m] || "New York, US";
+  const h = 8 + (t.id*7)%13, mi = (t.id*23)%60;
+  const method = ONLINE[t.m] ? (["openai","netflix","spotify","figma","apple","electricity"].includes(t.m) ? "Recurring · card on file" : "Online · card on file")
+    : t.m==="uber" ? "In-app payment" : "Apple Pay · contactless";
+  const card = AGENT_CARD[t.m] ? `${M[t.m].name} agentic card •• ${AGENT_CARD[t.m]}` : "Visa •• 4821";
+  return { place, inDubai, time:`${String(h).padStart(2,"0")}:${String(mi).padStart(2,"0")}`, method, card,
+    status: t.d==="2026-09-27" ? "Pending" : "Settled", mcc: MCC[t.m]||["5999","Retail"],
+    descriptor: DESCRIPTOR[t.m] || t.label.toUpperCase().replace(/[^A-Z0-9 #*.]/g,"").slice(0,24),
+    ref: "74" + String(10000000000 + t.id*7919357).slice(-11), local: inDubai ? t.a*AED : null };
+}
+
 function openTx(id){
-  const t=TX.find(x=>x.id===id), mm=view(t.m,t.p), root=mm.root;
+  const t=TX.find(x=>x.id===id), mm=view(t.m,t.p), root=mm.root, X=txMeta(t);
   const kids=root.children||[], claimed=kids.reduce((s,k)=>s+k.pct,0);
   const buckets=[{node:{...root,children:[],name:`Kept by ${mm.name}`,cat:mm.cat,desc:root.desc,cos:[...(root.cos||[]),...(root.owners||[])]},usd:t.a*(100-claimed)/100},
     ...kids.map(k=>({node:k,usd:t.a*k.pct/100}))].sort((a,b)=>b.usd-a.usd);
   const cos={}; flow(t.m,t.a,t.p).forEach(f=>{const l=f.node.cos||[]; l.forEach(tk=>cos[tk]=(cos[tk]||0)+f.listed/l.length);});
   const ideas=Object.entries(cos).filter(([tk])=>inMarket(tk)).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const date=new Date(t.d+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+
+  // spend analysis
+  const total=TX.reduce((s,x)=>s+x.a,0), same=TX.filter(x=>x.m===t.m), mTot=same.reduce((s,x)=>s+x.a,0);
+  const cat=M[t.m].txcat, catTx=TX.filter(x=>M[x.m].txcat===cat), cTot=catTx.reduce((s,x)=>s+x.a,0);
+  const cats={}; TX.forEach(x=>{const c=M[x.m].txcat; cats[c]=(cats[c]||0)+x.a;});
+  const catRows=Object.entries(cats).sort((a,b)=>b[1]-a[1]), rank=catRows.findIndex(([c])=>c===cat)+1, maxC=catRows[0][1];
+  const recurring = !product(t.m,t.p).once && ["Recurring · card on file"].includes(X.method);
+  const next = recurring ? new Date(new Date(t.d+"T12:00:00").setMonth(9)).toLocaleDateString("en-US",{month:"short",day:"numeric"}) : null;
+  const abroad = same.filter(x=>txMeta(x).inDubai);
+
+  const row=(k,v)=>`<div class="kv"><span>${k}</span><b>${v}</b></div>`;
   $("#detail").innerHTML=`
     <button class="close" id="close" aria-label="Close">×</button>
     <div class="dh">${mLogo(t.m,"lg")}<div><h3>${esc(mm.name)}</h3><div class="muted" style="font-size:13px">${esc(t.label)} · ${date}</div></div></div>
     <div class="amt num">${fmt(t.a)}</div>
-    <div class="facts">${mm.stats.map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join("")}</div>
-    <p class="note">${esc(mm.insight)}</p>
+    <div class="muted" style="font-size:13px;margin-top:-2px"><span class="stp ${X.status==="Pending"?"pend":""}">${X.status}</span>${X.local?` · AED ${X.local.toFixed(2)}`:""} · ${esc(X.place)}</div>
 
-    <h4>Where your ${fmt(t.a)} goes</h4>
-    <div class="vt"><button class="on" data-v="list">List</button><button data-v="flow">Money flow</button></div>
-    <div class="fv" id="dfv" style="display:none;margin-bottom:8px"></div><div id="dlist">
-    <div class="stack" style="margin:4px 0 12px">${buckets.map(b=>`<span style="width:${b.usd/t.a*100}%;background:${CAT[b.node.cat||mm.cat].c}"></span>`).join("")}</div>
-    ${buckets.map(b=>nodeHTML(b.node,b.usd,t.a,mm)).join("")}</div>
+    <div class="ttabs"><button class="on" data-tab="details">Details</button><button data-tab="spend">Spend analysis</button><button data-tab="flow">Money flow</button></div>
 
-    <h4>Stocks linked to this purchase${state.market!=="ALL"?` · ${REG[state.market]}`:""}</h4>
-    ${ideas.length?ideas.map(([tk,u])=>`<div class="row">${cLogo(tk)}<div class="main"><div class="t">${esc(CO[tk].n)} <span class="muted" style="font-weight:400;font-size:13px">${esc(tk)}</span></div><div class="s" style="white-space:normal">${esc(CO[tk].w)}</div></div><div class="r num">${fmt(u)}</div><button class="buy" data-tk="${esc(tk)}">Buy</button></div>`).join("")
-      :`<p class="note">No companies in this chain are listed in ${REG[state.market]}.</p>`}
+    <div class="tpane" data-pane="details">
+      <div class="kvs">
+        ${row("Status",X.status==="Pending"?"Pending · usually settles in 1–3 days":"Settled")}
+        ${row("Date & time",`${date}, ${X.time}`)}
+        ${row("Merchant",esc(mm.name))}
+        ${row("Statement descriptor",`<span class="mono">${esc(X.descriptor)}</span>`)}
+        ${row("Location",esc(X.place))}
+        ${row("Category",`${esc(X.mcc[1])} · MCC ${X.mcc[0]}`)}
+        ${row("Paid with",esc(X.card))}
+        ${row("Method",esc(X.method))}
+      </div>
+      ${X.local?`<h4>Currency conversion</h4><div class="kvs">
+        ${row("Charged by merchant",`AED ${X.local.toFixed(2)}`)}
+        ${row("Exchange rate","1 USD = 3.6725 AED")}
+        ${row("Foreign transaction fee","$0.00")}
+        ${row("Billed to you",fmt(t.a))}</div>`:""}
+      <h4>Reference</h4><div class="kvs">
+        ${row("Reference number",`<span class="mono">${X.ref}</span>`)}
+        ${row("Transaction ID",`<span class="mono">tx_${t.d.replace(/-/g,"")}${String(t.id).padStart(3,"0")}</span>`)}
+      </div>
+      <div class="tactions"><button class="pbtn ghost">Report a problem</button><button class="pbtn ghost">Split</button><button class="pbtn ghost">Download receipt</button></div>
+    </div>
 
-    <h4>Tokens</h4>
-    ${mm.tokens.length?`<div>${mm.tokens.map(([s,n,w])=>`<span class="tok" title="${esc(w)}"><b>${s}</b><span>${esc(n)}</span></span>`).join("")}</div><p class="src">Crypto proxies. Very high risk.</p>`
-      :`<p class="note">${esc(mm.tokenNote)}</p>`}
+    <div class="tpane" data-pane="spend" hidden>
+      <div class="sstats">
+        <div><b class="num">${fmt(mTot)}</b><span>at ${esc(mm.name)} this month</span></div>
+        <div><b class="num">${same.length}×</b><span>${same.length>1?`avg ${fmt(mTot/same.length)}`:"one purchase"}</span></div>
+        <div><b class="num">${(mTot/total*100).toFixed(1)}%</b><span>of September spend</span></div>
+      </div>
+      <p class="note">${esc(mm.name)} is in your <b>${esc(cat)}</b> spending: ${fmt(cTot)} this month, your #${rank} category (${(cTot/total*100).toFixed(0)}% of ${fmt(total)}).${abroad.length?` ${abroad.length} of ${same.length} ${same.length>1?"charges were":"charge was"} abroad, in Dubai.`:""}${recurring?` This is a recurring subscription; the next charge is expected around ${next}.`:""}</p>
+      <h4>Your categories this month</h4>
+      ${catRows.slice(0,7).map(([c,v])=>`<div class="cbar ${c===cat?"me":""}"><span>${esc(c)}</span><i><em style="width:${v/maxC*100}%"></em></i><b class="num">${fmt(v)}</b></div>`).join("")}
+      <h4>${esc(mm.name)} transactions this month</h4>
+      ${same.map(x=>`<div class="kv"><span>${new Date(x.d+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"})} · ${esc(x.label)}${txMeta(x).inDubai?' <em class="tagx">Dubai</em>':""}</span><b class="num">${fmt(x.a)}</b></div>`).join("")}
+    </div>
 
-    <h4>Sources</h4>
-    <div class="src">${mm.src.map(([s,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(s)}</a>`).join(" · ")}</div>`;
+    <div class="tpane" data-pane="flow" hidden>
+      <div class="facts">${mm.stats.map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join("")}</div>
+      <p class="note">${esc(mm.insight)}</p>
+      <h4>Where your ${fmt(t.a)} goes</h4>
+      <div class="vt"><button class="on" data-v="list">List</button><button data-v="flow">Money flow</button></div>
+      <div class="fv" id="dfv" style="display:none;margin-bottom:8px"></div><div id="dlist">
+      <div class="stack" style="margin:4px 0 12px">${buckets.map(b=>`<span style="width:${b.usd/t.a*100}%;background:${CAT[b.node.cat||mm.cat].c}"></span>`).join("")}</div>
+      ${buckets.map(b=>nodeHTML(b.node,b.usd,t.a,mm)).join("")}</div>
+      <h4>Stocks linked to this purchase${state.market!=="ALL"?` · ${REG[state.market]}`:""}</h4>
+      ${ideas.length?ideas.map(([tk,u])=>`<div class="row">${cLogo(tk)}<div class="main"><div class="t">${esc(CO[tk].n)} <span class="muted" style="font-weight:400;font-size:13px">${esc(tk)}</span></div><div class="s" style="white-space:normal">${esc(CO[tk].w)}</div></div><div class="r num">${fmt(u)}</div><button class="buy" data-tk="${esc(tk)}">Buy</button></div>`).join("")
+        :`<p class="note">No companies in this chain are listed in ${REG[state.market]}.</p>`}
+      <h4>Tokens</h4>
+      ${mm.tokens.length?`<div>${mm.tokens.map(([s,n,w])=>`<span class="tok" title="${esc(w)}"><b>${s}</b><span>${esc(n)}</span></span>`).join("")}</div><p class="src">Crypto proxies. Very high risk.</p>`
+        :`<p class="note">${esc(mm.tokenNote)}</p>`}
+      <h4>Sources</h4>
+      <div class="src">${mm.src.map(([s,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(s)}</a>`).join(" · ")}</div>
+    </div>`;
+  $("#detail").querySelectorAll(".ttabs button").forEach(b=>b.onclick=()=>{
+    $("#detail").querySelectorAll(".ttabs button").forEach(x=>x.classList.toggle("on",x===b));
+    $("#detail").querySelectorAll(".tpane").forEach(p=>p.hidden = p.dataset.pane!==b.dataset.tab); });
   $("#detail").querySelectorAll(".nh").forEach(b=>b.onclick=()=>b.parentElement.classList.toggle("open"));
   $("#detail").querySelectorAll(".buy").forEach(b=>b.onclick=()=>openBuy(b.dataset.tk));
   $("#detail").querySelectorAll(".vt button").forEach(b=>b.onclick=()=>{
